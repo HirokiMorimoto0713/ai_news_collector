@@ -255,8 +255,8 @@ class ScheduledAINewsSystem:
                 tags=["AI", "技術動向", "まとめ", "最新情報", "自動投稿"]
             )
             
-            if post_info:
-                self.logger.info(f"WordPress投稿成功: {post_info['link']}")
+                if post_info:
+                    self.logger.info(f"WordPress投稿成功: {post_info['link']}")
                 
                 # 詳細ログを保存
                 publisher.save_publication_log(post_info, processed_articles, post_content)

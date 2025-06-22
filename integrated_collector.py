@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import List, Dict
 from news_collector import AINewsCollector, NewsArticle
 from twitter_collector import collect_twitter_articles
+from simple_scraper import SimpleScraper, SimpleArticle
 
 class IntegratedAICollector:
     """統合AI情報収集クラス"""
@@ -18,25 +19,30 @@ class IntegratedAICollector:
         self.config_file = config_file
         self.config = self.load_config()
         self.news_collector = AINewsCollector()
+        self.simple_scraper = SimpleScraper()
         self.all_articles = []
     
     def load_config(self) -> Dict:
         """設定を読み込み"""
         default_config = {
-            "max_articles_per_day": 5,
+            "max_articles_per_day": 10,
             "sources": {
                 "twitter": {
-                    "enabled": True,
-                    "use_api": False,  # デフォルトはAPI使用しない（リスク回避）
-                    "max_articles": 2
+                    "enabled": False,
+                    "use_api": False,
+                    "max_articles": 0
                 },
                 "news_sites": {
                     "enabled": True,
-                    "max_articles": 2
+                    "max_articles": 10
                 },
                 "tech_blogs": {
                     "enabled": True,
-                    "max_articles": 1
+                    "max_articles": 5
+                },
+                "simple_scraper": {
+                    "enabled": True,
+                    "max_articles": 5
                 }
             },
             "filters": {
@@ -58,6 +64,20 @@ class IntegratedAICollector:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(default_config, f, ensure_ascii=False, indent=2)
             return default_config
+
+    def simple_article_to_news_article(self, simple_article: SimpleArticle) -> NewsArticle:
+        """SimpleArticleをNewsArticleに変換"""
+        published_date = simple_article.published_date
+        if published_date is None:
+            published_date = datetime.now().isoformat()
+        
+        return NewsArticle(
+            title=simple_article.title,
+            url=simple_article.url,
+            content=simple_article.content,
+            source=simple_article.source,
+            published_date=published_date
+        )
     
     def filter_article(self, article: NewsArticle) -> bool:
         """記事のフィルタリング"""
@@ -115,62 +135,45 @@ class IntegratedAICollector:
         
         return filtered_articles
     
-    async def collect_all_sources(self) -> List[NewsArticle]:
-        """全ソースから情報を収集"""
+    async def collect_x_related_information(self, max_posts: int = 3) -> List[NewsArticle]:
+        """X関連情報を収集（APIを使用しない方式）"""
+        try:
+            from simple_x_collector import collect_simple_x_posts
+            
+            print("📱 X関連情報収集開始...")
+            articles = await collect_simple_x_posts(max_posts=max_posts)
+            print(f"   ✅ X関連情報: {len(articles)}件取得")
+            return articles
+            
+        except Exception as e:
+            print(f"   ❌ X関連情報収集エラー: {e}")
+            return []
+    
+    async def collect_all_articles(self) -> List[NewsArticle]:
+        """全ソースから記事を収集"""
         all_articles = []
         
-        print("=== AI情報収集開始 ===")
+        print("🚀 統合記事収集開始")
         
-        # X/Twitter収集（24時間以内のみ）
-        if self.config["sources"]["twitter"]["enabled"]:
-            try:
-                min_likes = self.config["sources"]["twitter"].get("min_likes", 30)
-                max_articles = self.config["sources"]["twitter"].get("max_articles", 10)
-                twitter_articles = await collect_twitter_articles(
-                    use_api=self.config["sources"]["twitter"]["use_api"],
-                    min_likes=min_likes,
-                    max_articles=max_articles
-                )
-                # 24時間以内の記事のみフィルタリング
-                filtered_twitter = self.filter_by_time(twitter_articles, hours=24)
-                all_articles.extend(filtered_twitter)
-                print(f"X/Twitter: {len(filtered_twitter)} 件収集（24時間以内）")
-            except Exception as e:
-                print(f"X/Twitter収集エラー: {e}")
+        # 既存のニュース収集
+        try:
+            collector = AINewsCollector()
+            regular_articles = collector.collect_daily_articles()
+            all_articles.extend(regular_articles)
+            print(f"📰 通常ニュース: {len(regular_articles)}件")
+        except Exception as e:
+            print(f"❌ 通常ニュース収集エラー: {e}")
         
-        # ニュースサイト収集
-        if self.config["sources"]["news_sites"]["enabled"]:
-            try:
-                news_articles = self.news_collector.collect_from_news_sites()
-                filtered_news = [a for a in news_articles if self.filter_article(a)]
-                max_news = self.config["sources"]["news_sites"]["max_articles"]
-                all_articles.extend(filtered_news[:max_news])
-                print(f"ニュースサイト: {len(filtered_news[:max_news])} 件収集")
-            except Exception as e:
-                print(f"ニュースサイト収集エラー: {e}")
+        # X関連情報収集を追加
+        try:
+            x_articles = await self.collect_x_related_information(max_posts=3)
+            all_articles.extend(x_articles)
+            print(f"📱 X関連情報: {len(x_articles)}件")
+        except Exception as e:
+            print(f"❌ X関連情報収集エラー: {e}")
         
-        # 技術ブログ収集
-        if self.config["sources"]["tech_blogs"]["enabled"]:
-            try:
-                blog_articles = self.news_collector.collect_from_tech_blogs()
-                filtered_blogs = [a for a in blog_articles if self.filter_article(a)]
-                max_blogs = self.config["sources"]["tech_blogs"]["max_articles"]
-                all_articles.extend(filtered_blogs[:max_blogs])
-                print(f"技術ブログ: {len(filtered_blogs[:max_blogs])} 件収集")
-            except Exception as e:
-                print(f"技術ブログ収集エラー: {e}")
-        
-        # 重複除去
-        unique_articles = self.remove_duplicates(all_articles)
-        
-        # 最大件数まで制限
-        max_total = self.config["max_articles_per_day"]
-        final_articles = unique_articles[:max_total]
-        
-        self.all_articles = final_articles
-        print(f"=== 収集完了: 合計 {len(final_articles)} 件 ===")
-        
-        return final_articles
+        print(f"📊 総合計: {len(all_articles)}件の記事を収集")
+        return all_articles
     
     def remove_duplicates(self, articles: List[NewsArticle]) -> List[NewsArticle]:
         """重複記事を除去"""
@@ -204,56 +207,127 @@ class IntegratedAICollector:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(articles_data, f, ensure_ascii=False, indent=2)
         
-        print(f"収集記事を {filename} に保存しました")
-        return filename
+        print(f"記事データを {filename} に保存しました")
     
     def get_collection_summary(self) -> Dict:
-        """収集結果のサマリーを取得"""
-        if not self.all_articles:
-            return {"total": 0, "by_source": {}}
-        
-        summary = {
-            "total": len(self.all_articles),
-            "by_source": {},
-            "collection_time": datetime.now().isoformat()
-        }
-        
+        """収集サマリーを取得"""
+        source_counts = {}
         for article in self.all_articles:
             source = article.source
-            if source not in summary["by_source"]:
-                summary["by_source"][source] = 0
-            summary["by_source"][source] += 1
+            source_counts[source] = source_counts.get(source, 0) + 1
         
-        return summary
+        return {
+            'total_articles': len(self.all_articles),
+            'source_breakdown': source_counts,
+            'collection_time': datetime.now().isoformat(),
+            'config_used': self.config
+        }
 
 async def main():
     """メイン実行関数"""
     collector = IntegratedAICollector()
     
-    # 情報収集実行
-    articles = await collector.collect_all_sources()
+    print("統合AI情報収集システム開始")
+    articles = await collector.collect_all_articles()
     
-    # 結果保存
-    filename = collector.save_collected_articles()
+    if articles:
+        collector.save_collected_articles()
+        summary = collector.get_collection_summary()
+        
+        print("\n=== 収集サマリー ===")
+        print(f"総記事数: {summary['total_articles']}")
+        print("ソース別内訳:")
+        for source, count in summary['source_breakdown'].items():
+            print(f"  {source}: {count}件")
+        
+        print("\n=== 収集記事一覧 ===")
+        for i, article in enumerate(articles, 1):
+            print(f"{i}. {article.title}")
+            print(f"   ソース: {article.source}")
+            print(f"   URL: {article.url}")
+            print()
+    else:
+        print("記事が収集されませんでした")
+
+async def collect_all_ai_news():
+    """すべてのソースからAIニュースを収集"""
+    all_articles = []
     
-    # サマリー表示
-    summary = collector.get_collection_summary()
-    print("\n=== 収集サマリー ===")
-    print(f"総記事数: {summary['total']}")
-    print("ソース別:")
-    for source, count in summary["by_source"].items():
-        print(f"  {source}: {count}件")
+    print("🚀 統合AIニュース収集開始")
+    print("=" * 60)
     
-    # 記事一覧表示
-    print("\n=== 収集記事一覧 ===")
-    for i, article in enumerate(articles, 1):
-        print(f"{i}. {article.title}")
-        print(f"   ソース: {article.source}")
-        print(f"   URL: {article.url}")
-        print(f"   内容: {article.content[:100]}...")
-        print()
+    # 1. 通常のニュース収集
+    try:
+        print("\n📰 通常ニュース収集中...")
+        from news_collector import collect_news
+        news_articles = await collect_news()
+        all_articles.extend(news_articles)
+        print(f"✅ 通常ニュース: {len(news_articles)}件")
+    except Exception as e:
+        print(f"❌ 通常ニュース収集エラー: {e}")
     
-    return articles, filename
+    # 2. Simple X Collector（安定版）
+    try:
+        print("\n🐦 X関連情報収集中...")
+        from simple_x_collector import collect_x_related_info
+        x_articles = await collect_x_related_info()
+        all_articles.extend(x_articles)
+        print(f"✅ X関連情報: {len(x_articles)}件")
+    except Exception as e:
+        print(f"❌ X関連情報収集エラー: {e}")
+    
+    # X投稿収集機能は一旦保留
+    # TODO: 実際のX投稿収集機能の実装を検討中
+    # 現在の代替手段は要求に合わないため保留
+    
+    # # 3. 直接X投稿スクレイピング（実験版）- 保留中
+    # try:
+    #     print("\n🔍 直接X投稿スクレイピング中...")
+    #     from direct_x_scraper import collect_direct_x_posts
+    #     direct_x_articles = await collect_direct_x_posts(max_posts=3)
+    #     if direct_x_articles:
+    #         all_articles.extend(direct_x_articles)
+    #         print(f"✅ 直接X投稿: {len(direct_x_articles)}件")
+    #     else:
+    #         print("⚠️ 直接X投稿: 0件 (フォールバック済み)")
+    # except Exception as e:
+    #     print(f"❌ 直接X投稿スクレイピングエラー: {e}")
+    
+    # # 4. Real X Scraper（代替手段）- 保留中
+    # try:
+    #     print("\n📱 代替X投稿収集中...")
+    #     from real_x_scraper import collect_real_x_posts
+    #     real_x_articles = await collect_real_x_posts(max_posts=3)
+    #     all_articles.extend(real_x_articles)
+    #     print(f"✅ 代替X投稿: {len(real_x_articles)}件")
+    # except Exception as e:
+    #     print(f"❌ 代替X投稿収集エラー: {e}")
+    
+    # 重複除去
+    unique_articles = []
+    seen_titles = set()
+    for article in all_articles:
+        title_key = article.title[:50].lower()
+        if title_key not in seen_titles:
+            seen_titles.add(title_key)
+            unique_articles.append(article)
+    
+    print(f"\n📊 統合収集結果:")
+    print(f"   総収集数: {len(all_articles)}件")
+    print(f"   重複除去後: {len(unique_articles)}件")
+    print(f"   ※X投稿収集機能は現在保留中です")
+    
+    # ソース別統計
+    source_stats = {}
+    for article in unique_articles:
+        source = article.source
+        source_stats[source] = source_stats.get(source, 0) + 1
+    
+    print(f"\n📈 ソース別統計:")
+    for source, count in source_stats.items():
+        print(f"   {source}: {count}件")
+    
+    return unique_articles
 
 if __name__ == "__main__":
     asyncio.run(main())
