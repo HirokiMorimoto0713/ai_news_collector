@@ -1,0 +1,17 @@
+{
+  "openai": {
+    "model": "gpt-4o-mini",
+    "max_tokens": 500,
+    "temperature": 0.3,
+    "timeout": 30
+  },
+  "collection": {
+    "max_articles_per_source": 5,
+    "min_content_length": 50,
+    "timeout": 10
+  },
+  "processing": {
+    "summary_max_length": 300,
+    "comment_max_length": 200
+  }
+}

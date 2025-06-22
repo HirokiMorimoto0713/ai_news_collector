@@ -1,0 +1,41 @@
+{
+  "news_sources": [
+    {
+      "name": "TechCrunch AI",
+      "url": "https://techcrunch.com/category/artificial-intelligence/",
+      "enabled": true
+    },
+    {
+      "name": "AI News",
+      "url": "https://artificialintelligence-news.com/",
+      "enabled": true
+    },
+    {
+      "name": "MIT Technology Review AI",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/",
+      "enabled": true
+    }
+  ],
+  "twitter": {
+    "enabled": false,
+    "accounts": [
+      "@OpenAI",
+      "@GoogleAI",
+      "@DeepMind"
+    ],
+    "keywords": [
+      "AI",
+      "人工知能",
+      "機械学習",
+      "深層学習"
+    ]
+  },
+  "filters": {
+    "min_content_length": 100,
+    "exclude_keywords": [
+      "広告",
+      "PR",
+      "sponsored"
+    ]
+  }
+}

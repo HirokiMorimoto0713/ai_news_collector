@@ -1,0 +1,21 @@
+{
+  "wp_url": "https://your-wordpress-site.com",
+  "wp_user": "your_wp_username",
+  "wp_app_pass": "your_wp_app_password",
+  "post_settings": {
+    "status": "publish",
+    "category_id": 1,
+    "tags": [
+      "AI",
+      "技術動向",
+      "最新情報"
+    ],
+    "author_id": 1,
+    "featured_media": null
+  },
+  "slug_settings": {
+    "auto_generate": true,
+    "prefix": "ai-news-",
+    "max_length": 50
+  }
+}

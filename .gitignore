@@ -1,0 +1,97 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Environment Variables & Secrets
+.env
+*.env
+.env.local
+.env.production
+.env.staging
+
+# WordPress Configuration (contains sensitive info)
+wordpress_config.json
+
+# Log Files
+*.log
+ai_news_system.log
+cron.log
+
+# Data Files (generated content)
+article_history.json
+article_history_backup.json
+collected_articles.json
+daily_ai_news_*.json
+processed_articles_*.json
+wordpress_post_log_*.json
+test_report.json
+
+# Backup Files
+*.bak
+*.backup
+*~
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary Files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# API Keys and Credentials
+config.json
+collector_config.json
+system_config.json
+
+# Test Files (if they contain sensitive data)
+test_*.json
+
+# Coverage Reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/ 
