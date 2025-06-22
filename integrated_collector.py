@@ -136,18 +136,21 @@ class IntegratedAICollector:
         return filtered_articles
     
     async def collect_x_related_information(self, max_posts: int = 3) -> List[NewsArticle]:
-        """X関連情報を収集（APIを使用しない方式）"""
-        try:
-            from simple_x_collector import collect_simple_x_posts
-            
-            print("📱 X関連情報収集開始...")
-            articles = await collect_simple_x_posts(max_posts=max_posts)
-            print(f"   ✅ X関連情報: {len(articles)}件取得")
-            return articles
-            
-        except Exception as e:
-            print(f"   ❌ X関連情報収集エラー: {e}")
-            return []
+        """X関連情報を収集（完全無効化済み）"""
+        print("⚠️ X関連情報収集は無効化されています（ユーザー要求）")
+        return []
+        
+        # try:
+        #     from simple_x_collector import collect_simple_x_posts
+        #     
+        #     print("📱 X関連情報収集開始...")
+        #     articles = await collect_simple_x_posts(max_posts=max_posts)
+        #     print(f"   ✅ X関連情報: {len(articles)}件取得")
+        #     return articles
+        #     
+        # except Exception as e:
+        #     print(f"   ❌ X関連情報収集エラー: {e}")
+        #     return []
     
     async def collect_all_articles(self) -> List[NewsArticle]:
         """全ソースから記事を収集"""
@@ -164,13 +167,16 @@ class IntegratedAICollector:
         except Exception as e:
             print(f"❌ 通常ニュース収集エラー: {e}")
         
-        # X関連情報収集を追加
-        try:
-            x_articles = await self.collect_x_related_information(max_posts=3)
-            all_articles.extend(x_articles)
-            print(f"📱 X関連情報: {len(x_articles)}件")
-        except Exception as e:
-            print(f"❌ X関連情報収集エラー: {e}")
+        # X関連情報収集 - 完全無効化
+        # ユーザー要求により、X風の情報も含めて全て無効化
+        print(f"⚠️ X関連情報収集は無効化されています（ユーザー要求）")
+        
+        # try:
+        #     x_articles = await self.collect_x_related_information(max_posts=3)
+        #     all_articles.extend(x_articles)
+        #     print(f"📱 X関連情報: {len(x_articles)}件")
+        # except Exception as e:
+        #     print(f"❌ X関連情報収集エラー: {e}")
         
         print(f"📊 総合計: {len(all_articles)}件の記事を収集")
         return all_articles
@@ -256,7 +262,7 @@ async def collect_all_ai_news():
     print("🚀 統合AIニュース収集開始")
     print("=" * 60)
     
-    # 1. 通常のニュース収集
+    # 1. 通常のニュース収集のみ
     try:
         print("\n📰 通常ニュース収集中...")
         from news_collector import collect_news
@@ -266,15 +272,22 @@ async def collect_all_ai_news():
     except Exception as e:
         print(f"❌ 通常ニュース収集エラー: {e}")
     
-    # 2. Simple X Collector（安定版）
-    try:
-        print("\n🐦 X関連情報収集中...")
-        from simple_x_collector import collect_x_related_info
-        x_articles = await collect_x_related_info()
-        all_articles.extend(x_articles)
-        print(f"✅ X関連情報: {len(x_articles)}件")
-    except Exception as e:
-        print(f"❌ X関連情報収集エラー: {e}")
+    # X関連情報収集は完全に無効化
+    # ユーザー要求により、X風の情報も含めて全て無効化
+    print(f"\n⚠️ X関連情報収集は無効化されています")
+    print(f"   - 実際のX投稿収集: 技術的制約により保留")
+    print(f"   - X風の代替情報: ユーザー要求により無効化")
+    print(f"   - 収集対象: ニュースサイトのみ")
+    
+    # # 2. Simple X Collector（安定版）- 完全無効化
+    # try:
+    #     print("\n🐦 X関連情報収集中...")
+    #     from simple_x_collector import collect_x_related_info
+    #     x_articles = await collect_x_related_info()
+    #     all_articles.extend(x_articles)
+    #     print(f"✅ X関連情報: {len(x_articles)}件")
+    # except Exception as e:
+    #     print(f"❌ X関連情報収集エラー: {e}")
     
     # X投稿収集機能は一旦保留
     # TODO: 実際のX投稿収集機能の実装を検討中
@@ -315,7 +328,7 @@ async def collect_all_ai_news():
     print(f"\n📊 統合収集結果:")
     print(f"   総収集数: {len(all_articles)}件")
     print(f"   重複除去後: {len(unique_articles)}件")
-    print(f"   ※X投稿収集機能は現在保留中です")
+    print(f"   ※収集対象: ニュースサイトのみ")
     
     # ソース別統計
     source_stats = {}
