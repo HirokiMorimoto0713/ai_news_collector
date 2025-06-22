@@ -170,7 +170,17 @@ WordPress投稿時に、日本語タイトルから自動的にSEOフレンド�
 
 ## 🔧 使用方法
 
-### 手動実行
+### 🎯 推奨: 新しい統合投稿システム
+
+```bash
+# テスト実行（投稿はしない）
+python3 daily_publisher.py --test
+
+# 実際の記事収集・処理・投稿
+python3 daily_publisher.py
+```
+
+### 従来の手動実行
 
 ```bash
 # 情報収集のみ

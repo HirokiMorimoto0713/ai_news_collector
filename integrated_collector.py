@@ -84,13 +84,44 @@ class IntegratedAICollector:
         
         return has_required_keyword
     
+    def filter_by_time(self, articles: List[NewsArticle], hours: int = 24) -> List[NewsArticle]:
+        """指定時間以内の記事のみをフィルタリング"""
+        from datetime import datetime, timedelta
+        
+        now = datetime.now()
+        time_limit = now - timedelta(hours=hours)
+        filtered_articles = []
+        
+        for article in articles:
+            # published_dateが設定されている場合のみ時間フィルタを適用
+            if article.published_date:
+                try:
+                    # ISO形式の日時をパース
+                    published_time = datetime.fromisoformat(article.published_date.replace('Z', '+00:00'))
+                    # タイムゾーンを除去して比較
+                    published_time = published_time.replace(tzinfo=None)
+                    
+                    if published_time >= time_limit:
+                        filtered_articles.append(article)
+                    else:
+                        print(f"古い記事をスキップ: {article.title} ({article.published_date})")
+                except Exception as e:
+                    print(f"日時解析エラー ({article.title}): {e}")
+                    # 日時が解析できない場合は含める（安全側に倒す）
+                    filtered_articles.append(article)
+            else:
+                # 公開日時が不明な場合は含める（安全側に倒す）
+                filtered_articles.append(article)
+        
+        return filtered_articles
+    
     async def collect_all_sources(self) -> List[NewsArticle]:
         """全ソースから情報を収集"""
         all_articles = []
         
         print("=== AI情報収集開始 ===")
         
-        # X/Twitter収集
+        # X/Twitter収集（24時間以内のみ）
         if self.config["sources"]["twitter"]["enabled"]:
             try:
                 min_likes = self.config["sources"]["twitter"].get("min_likes", 30)
@@ -100,10 +131,10 @@ class IntegratedAICollector:
                     min_likes=min_likes,
                     max_articles=max_articles
                 )
-                # フィルタリングを緩和（テスト用）
-                filtered_twitter = twitter_articles  # フィルタリングを一時的に無効化
+                # 24時間以内の記事のみフィルタリング
+                filtered_twitter = self.filter_by_time(twitter_articles, hours=24)
                 all_articles.extend(filtered_twitter)
-                print(f"X/Twitter: {len(filtered_twitter)} 件収集")
+                print(f"X/Twitter: {len(filtered_twitter)} 件収集（24時間以内）")
             except Exception as e:
                 print(f"X/Twitter収集エラー: {e}")
         

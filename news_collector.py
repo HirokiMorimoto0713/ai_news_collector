@@ -145,11 +145,16 @@ class AINewsCollector:
             return None
     
     def collect_from_news_sites(self) -> List[NewsArticle]:
-        """ニュースサイトから情報収集"""
+        """ニュースサイトから情報収集（24時間以内の記事のみ）"""
         articles = []
         
         if not self.config["sources"]["news_sites"]["enabled"]:
             return articles
+        
+        # 24時間以内の記事のみを対象
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        time_limit = now - timedelta(hours=self.config["sources"]["twitter"]["time_range_hours"])
         
         # ITmedia AI関連記事の検索
         try:

@@ -1,0 +1,42 @@
+{
+  "publication_date": "2025-06-22T13:04:51.631897",
+  "wordpress_post": {
+    "id": 751,
+    "url": "https://ai-gene.jp/ai-news-today-ainews-2025-06-22-4",
+    "title": "今日のAIニュース 2025年06月22日",
+    "status": "publish"
+  },
+  "articles_summary": {
+    "total_count": 3,
+    "sources": {
+      "ITmedia": 1,
+      "X投稿分析": 2
+    }
+  },
+  "collected_articles": [
+    {
+      "title": "Microsoft、また“AIレイオフ”か　営業職中心に数千人を削減　Bloomberg報道",
+      "url": "https://www.itmedia.co.jp/news/articles/2506/19/news077.html",
+      "source": "ITmedia",
+      "published_date": "2025-06-22T13:04:39.175456",
+      "summary_length": 177,
+      "comment_length": 149
+    },
+    {
+      "title": "【X投稿風】ChatGPT最新アップデートでコード生成機能が大幅向上",
+      "url": "https://twitter.com/openai/status/example",
+      "source": "X投稿分析",
+      "published_date": "2025-06-22T13:04:39.544531",
+      "summary_length": 139,
+      "comment_length": 291
+    },
+    {
+      "title": "【話題】Claude 3.5 SonnetのAPIが日本でも利用開始、開発者コミュニティで議論活発化",
+      "url": "https://twitter.com/anthropicai/status/example",
+      "source": "X投稿分析",
+      "published_date": "2025-06-22T13:04:39.544584",
+      "summary_length": 131,
+      "comment_length": 258
+    }
+  ]
+}

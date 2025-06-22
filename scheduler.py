@@ -232,8 +232,8 @@ class ScheduledAINewsSystem:
             self.logger.error(f"記事処理エラー: {e}")
             return []
     
-    def daily_posting_job(self, processed_articles: List):
-        """日次投稿ジョブ"""
+    async def daily_posting_job(self, processed_articles: List):
+        """日次投稿ジョブ（新しいDailyAIPublisherを使用）"""
         if not processed_articles:
             self.logger.info("投稿する記事がありません")
             return
@@ -241,18 +241,33 @@ class ScheduledAINewsSystem:
         self.logger.info(f"=== {len(processed_articles)}件の記事投稿開始 ===")
         
         try:
-            if self.post_generator:
-                # WordPress投稿
-                post_info = self.post_generator.publish_daily_post(processed_articles)
-                if post_info:
-                    self.logger.info(f"WordPress投稿成功: {post_info['link']}")
-                else:
-                    self.logger.error("WordPress投稿失敗")
+            # 新しい投稿システムを使用
+            from daily_publisher import DailyAIPublisher
+            publisher = DailyAIPublisher()
+            
+            # 既に処理済みの記事を直接投稿
+            post_content = publisher.post_generator.generate_daily_post_content(processed_articles)
+            
+            post_info = publisher.wp_connector.create_post(
+                title=post_content['title'],
+                content=post_content['content'],
+                excerpt=post_content['excerpt'],
+                tags=["AI", "技術動向", "まとめ", "最新情報", "自動投稿"]
+            )
+            
+            if post_info:
+                self.logger.info(f"WordPress投稿成功: {post_info['link']}")
+                
+                # 詳細ログを保存
+                publisher.save_publication_log(post_info, processed_articles, post_content)
+                return post_info
             else:
-                self.logger.warning("WordPress連携が無効化されています")
+                self.logger.error("WordPress投稿失敗")
+                return None
                 
         except Exception as e:
             self.logger.error(f"投稿エラー: {e}")
+            return None
     
     async def run_daily_workflow(self):
         """日次ワークフロー実行"""
@@ -265,7 +280,7 @@ class ScheduledAINewsSystem:
         processed_articles = self.daily_processing_job(articles)
         
         # 3. WordPress投稿
-        self.daily_posting_job(processed_articles)
+        await self.daily_posting_job(processed_articles)
         
         self.logger.info("=== 日次ワークフロー完了 ===")
     

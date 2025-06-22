@@ -1,0 +1,88 @@
+{
+  "publication_date": "2025-06-22T12:50:33.328724",
+  "wordpress_post": {
+    "id": 743,
+    "url": "https://ai-gene.jp/ai-news-today-ainews-2025-06-22-2",
+    "title": "今日のAIニュース 2025年06月22日",
+    "status": "publish"
+  },
+  "articles_summary": {
+    "total_count": 8,
+    "sources": {
+      "AI News": 1,
+      "Medical AI": 1,
+      "Creative Tech": 1,
+      "Employment News": 1,
+      "Business AI": 1,
+      "Mobile Tech": 1,
+      "Academic AI": 1,
+      "Language Tech": 1
+    }
+  },
+  "collected_articles": [
+    {
+      "title": "ChatGPTの新機能「Canvas」がリリース、開発者の生産性が劇的向上",
+      "url": "https://example.com/chatgpt-canvas",
+      "source": "AI News",
+      "published_date": "2025-06-22T10:50:01.835768",
+      "summary_length": 150,
+      "comment_length": 276
+    },
+    {
+      "title": "Claude 3.5 Sonnetが画像解析機能を大幅強化、医療診断への応用も",
+      "url": "https://example.com/claude-image-analysis",
+      "source": "Medical AI",
+      "published_date": "2025-06-22T07:50:01.835768",
+      "summary_length": 117,
+      "comment_length": 238
+    },
+    {
+      "title": "Google Gemini 2.0、リアルタイム動画生成機能を搭載予定",
+      "url": "https://example.com/gemini-video-generation",
+      "source": "Creative Tech",
+      "published_date": "2025-06-22T04:50:01.835768",
+      "summary_length": 167,
+      "comment_length": 246
+    },
+    {
+      "title": "Meta、AI失業対策として新たなスキル開発プログラムを発表",
+      "url": "https://example.com/meta-ai-reskilling",
+      "source": "Employment News",
+      "published_date": "2025-06-22T00:50:01.835768",
+      "summary_length": 146,
+      "comment_length": 248
+    },
+    {
+      "title": "Perplexityが企業向けAI検索ソリューションを正式リリース",
+      "url": "https://example.com/perplexity-enterprise",
+      "source": "Business AI",
+      "published_date": "2025-06-21T21:50:01.835768",
+      "summary_length": 195,
+      "comment_length": 264
+    },
+    {
+      "title": "Apple Intelligence、iOS 18.2でSiriの会話能力が大幅向上",
+      "url": "https://example.com/apple-intelligence-update",
+      "source": "Mobile Tech",
+      "published_date": "2025-06-21T18:50:01.835768",
+      "summary_length": 158,
+      "comment_length": 233
+    },
+    {
+      "title": "Genspark、個人向けAI研究アシスタント機能をβ版で公開",
+      "url": "https://example.com/genspark-research-assistant",
+      "source": "Academic AI",
+      "published_date": "2025-06-21T16:50:01.835768",
+      "summary_length": 123,
+      "comment_length": 227
+    },
+    {
+      "title": "Felo AI翻訳、リアルタイム会議通訳機能で多言語ビジネスを支援",
+      "url": "https://example.com/felo-realtime-translation",
+      "source": "Language Tech",
+      "published_date": "2025-06-21T14:50:01.835768",
+      "summary_length": 177,
+      "comment_length": 234
+    }
+  ]
+}
