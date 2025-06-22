@@ -541,30 +541,33 @@ async def collect_all_news_sources():
         except Exception as e2:
             print(f"❌ フォールバック収集エラー: {e2}")
     
-    # 2. X関連情報収集
-    try:
-        from simple_x_collector import collect_simple_x_posts
-        x_posts = await collect_simple_x_posts(max_posts=3)
-        
-        # XPostをNewsArticleに変換
-        x_articles = []
-        for x_post in x_posts:
-            from news_collector import NewsArticle
-            article = NewsArticle(
-                title=x_post.title,
-                url=x_post.url,
-                content=x_post.content,
-                source=x_post.source,
-                published_date=x_post.published_date,
-                author=x_post.author
-            )
-            x_articles.append(article)
-        
-        all_articles.extend(x_articles)
-        print(f"📱 X関連情報: {len(x_articles)}件")
-        
-    except Exception as e:
-        print(f"❌ X関連情報収集エラー: {e}")
+    # 2. X関連情報収集 - 完全無効化
+    # ユーザー要求により、X風の情報も含めて全て無効化
+    print(f"⚠️ X関連情報収集は無効化されています（ユーザー要求）")
+    
+    # try:
+    #     from simple_x_collector import collect_simple_x_posts
+    #     x_posts = await collect_simple_x_posts(max_posts=3)
+    #     
+    #     # XPostをNewsArticleに変換
+    #     x_articles = []
+    #     for x_post in x_posts:
+    #         from news_collector import NewsArticle
+    #         article = NewsArticle(
+    #             title=x_post.title,
+    #             url=x_post.url,
+    #             content=x_post.content,
+    #             source=x_post.source,
+    #             published_date=x_post.published_date,
+    #             author=x_post.author
+    #         )
+    #         x_articles.append(article)
+    #     
+    #     all_articles.extend(x_articles)
+    #     print(f"📱 X関連情報: {len(x_articles)}件")
+    #     
+    # except Exception as e:
+    #     print(f"❌ X関連情報収集エラー: {e}")
     
     # 3. 重複除去と品質フィルタリング
     try:
