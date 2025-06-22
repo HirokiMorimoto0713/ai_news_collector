@@ -5,6 +5,7 @@ OpenAI APIを使用して記事の要約と感想を生成
 
 import os
 import json
+import re
 from typing import List, Dict, Optional
 from datetime import datetime
 import openai
@@ -23,14 +24,18 @@ class ProcessedArticle:
     summary: str
     user_value_comment: str
     processing_date: str
+    translated_title: str = ""  # 翻訳されたタイトル
+    content_preview: str = ""   # 本文プレビュー
     
     def to_dict(self) -> Dict:
         """辞書形式に変換"""
         return {
             'title': self.original_article.title,
+            'translated_title': self.translated_title,
             'url': self.original_article.url,
             'source': self.original_article.source,
             'original_content': self.original_article.content,
+            'content_preview': self.content_preview,
             'summary': self.summary,
             'user_value_comment': self.user_value_comment,
             'processing_date': self.processing_date,
@@ -98,6 +103,98 @@ class ArticleProcessor:
 
 具体的な影響分析（200字程度、です・ます調で2文ごと改行）:
 """
+        
+        self.translation_prompt_template = """
+以下の英語のタイトルを自然で読みやすい日本語に翻訳してください。
+
+【翻訳の要件】
+- 技術記事として自然な日本語表現
+- 専門用語は適切な日本語に置き換える
+- 読者にとって分かりやすい表現
+- 原文の意味を正確に保持
+
+英語タイトル: {title}
+
+日本語翻訳:
+"""
+    
+    def translate_english_title(self, title: str) -> str:
+        """英語タイトルを日本語に翻訳"""
+        # 英語かどうかを簡単にチェック
+        if not re.search(r'[a-zA-Z]', title):
+            return title  # 英語が含まれていない場合はそのまま返す
+        
+        try:
+            prompt = self.translation_prompt_template.format(title=title)
+            
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "あなたは技術記事の翻訳を得意とする翻訳者です。"},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=200,
+                temperature=0.3
+            )
+            
+            translated = response.choices[0].message.content
+            if translated:
+                return translated.strip()
+            return title
+            
+        except Exception as e:
+            print(f"翻訳エラー: {e}")
+            return title  # エラーの場合は元のタイトルを返す
+    
+    def create_content_preview(self, content: str, max_length: int = 200) -> str:
+        """記事本文のプレビューを作成"""
+        if not content:
+            return ""
+        
+        # HTMLタグを除去
+        clean_content = re.sub(r'<[^>]+>', '', content)
+        
+        # 改行や余分な空白を整理
+        clean_content = re.sub(r'\s+', ' ', clean_content).strip()
+        
+        # 指定された長さでカット
+        if len(clean_content) <= max_length:
+            return clean_content
+        
+        # 文の境界で切る
+        preview = clean_content[:max_length]
+        last_period = preview.rfind('.')
+        last_question = preview.rfind('?')
+        last_exclamation = preview.rfind('!')
+        
+        # 最後の句読点を見つける
+        last_sentence_end = max(last_period, last_question, last_exclamation)
+        
+        if last_sentence_end > max_length * 0.7:  # 70%以上の位置にある場合
+            preview = preview[:last_sentence_end + 1]
+        else:
+            preview = preview + "..."
+        
+        return preview
+    
+    def extract_image_from_content(self, content: str) -> Optional[str]:
+        """記事本文から画像URLを抽出"""
+        # img タグのsrc属性を抽出
+        img_pattern = r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>'
+        matches = re.findall(img_pattern, content, re.IGNORECASE)
+        
+        if matches:
+            # 最初の画像URLを返す
+            return matches[0]
+        
+        # Markdown形式の画像も検索
+        md_img_pattern = r'!\[[^\]]*\]\(([^)]+)\)'
+        md_matches = re.findall(md_img_pattern, content)
+        
+        if md_matches:
+            return md_matches[0]
+        
+        return None
     
     def generate_summary(self, article: NewsArticle) -> str:
         """記事の要約を生成"""
@@ -117,8 +214,10 @@ class ArticleProcessor:
                 temperature=0.7
             )
             
-            summary = response.choices[0].message.content.strip()
-            return summary
+            summary = response.choices[0].message.content
+            if summary:
+                return summary.strip()
+            return article.content[:300] + "..."
             
         except Exception as e:
             print(f"要約生成エラー: {e}")
@@ -143,8 +242,10 @@ class ArticleProcessor:
                 temperature=0.8
             )
             
-            comment = response.choices[0].message.content.strip()
-            return comment
+            comment = response.choices[0].message.content
+            if comment:
+                return comment.strip()
+            return "この技術により、ユーザーはより便利で効率的なAI体験を得ることができそうです。"
             
         except Exception as e:
             print(f"感想生成エラー: {e}")
@@ -152,8 +253,17 @@ class ArticleProcessor:
             return "この技術により、ユーザーはより便利で効率的なAI体験を得ることができそうです。"
     
     def process_article(self, article: NewsArticle) -> ProcessedArticle:
-        """記事を処理（要約+感想生成）"""
+        """記事を処理（要約+感想生成+翻訳+プレビュー）"""
         print(f"記事処理中: {article.title}")
+        
+        # タイトル翻訳（英語の場合）
+        translated_title = self.translate_english_title(article.title)
+        if translated_title != article.title:
+            print(f"タイトル翻訳完了: {len(translated_title)}文字")
+        
+        # 本文プレビュー作成
+        content_preview = self.create_content_preview(article.content)
+        print(f"プレビュー作成完了: {len(content_preview)}文字")
         
         # 要約生成
         summary = self.generate_summary(article)
@@ -167,7 +277,9 @@ class ArticleProcessor:
             original_article=article,
             summary=summary,
             user_value_comment=user_value_comment,
-            processing_date=datetime.now().isoformat()
+            processing_date=datetime.now().isoformat(),
+            translated_title=translated_title,
+            content_preview=content_preview
         )
         
         return processed_article

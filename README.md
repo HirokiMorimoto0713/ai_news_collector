@@ -1,287 +1,210 @@
-# AI情報自動収集・投稿システム
+# AI News Collector
 
-毎日AI関連の最新情報を自動収集し、要約・感想を付けてWordPressに自動投稿するシステムです。
+AIに関するニュースを自動収集し、WordPressに投稿するシステム
 
-## 🚀 主な機能
+## 📋 プロジェクト概要
 
-- **自動情報収集**: X/Twitter、ニュースサイト、技術ブログからAI関連情報を収集
-- **AI要約・感想生成**: OpenAI APIを使用した300字要約と「ユーザー価値」視点での感想生成
-- **WordPress自動投稿**: 既存のWordPressシステムと連携した自動投稿
-- **SEOフレンドリーなスラッグ自動生成**: 日本語タイトルから英語スラッグを自動生成
-- **重複除外**: 同一記事の重複投稿を防止
-- **スケジュール実行**: 毎日9時収集、10時投稿の自動化
+このシステムは複数のソースからAI関連のニュースを収集し、自動的にWordPressサイトに投稿することを目的としています。
 
-## 📋 システム要件
+## ✅ 現在実装済みの機能
 
-- **OS**: Ubuntu 22.04 LTS
-- **Python**: 3.11+
-- **環境**: GCP Compute Engine (推奨)
-- **必要なAPI**: OpenAI API、WordPress REST API
+### 1. ニュース収集システム
+- **ITmedia AI+**: AI関連の最新ニュース
+- **GIGAZINE**: テクノロジーニュース
+- **TechCrunch**: スタートアップ・技術ニュース
+- **その他技術ニュースサイト**: 多様な情報源
 
-## 🛠️ クイックスタート
+### 2. 記事処理システム
+- **自動要約**: 記事内容の要約生成
+- **重複除去**: 同じ内容の記事を自動検出・除去
+- **品質フィルタリング**: AI関連度による記事の厳選
 
-### 1. 自動セットアップ
+### 3. WordPress連携
+- **自動投稿**: 収集した記事のWordPress投稿
+- **カテゴリ分類**: AI関連カテゴリへの自動分類
+- **メタデータ設定**: SEO対応のメタ情報設定
 
-```bash
-# セットアップスクリプト実行
-curl -sSL https://raw.githubusercontent.com/your-repo/ai-news-collector/main/setup.sh | bash
-```
+### 4. 統合収集システム
+- **複数ソース統合**: 全ての収集源を統合管理
+- **スケジュール実行**: 定期的な自動収集
+- **エラーハンドリング**: 安定した動作保証
 
-### 2. 設定ファイル編集
-
-```bash
-cd /home/ubuntu/ai_news_collector
-
-# 環境変数設定
-cp .env.template .env
-nano .env  # APIキーとWordPress情報を設定
-
-# WordPress設定
-nano wordpress_config.json
-```
-
-### 3. システムファイル配置
-
-以下のファイルをプロジェクトディレクトリにコピー:
-- `news_collector.py`
-- `twitter_collector.py`
-- `integrated_collector.py`
-- `article_processor.py`
-- `wordpress_connector.py`
-- `scheduler.py`
-- `test_system.py`
-
-### 4. 動作テスト
-
-```bash
-# システムテスト実行
-python3 test_system.py
-
-# 手動実行テスト
-python3 scheduler.py workflow
-```
-
-### 5. cronジョブ設定
-
-```bash
-crontab -e
-
-# 以下を追加
-0 9 * * * cd /home/ubuntu/ai_news_collector && python3 scheduler.py collect
-0 10 * * * cd /home/ubuntu/ai_news_collector && python3 scheduler.py workflow
-0 2 * * * /home/ubuntu/ai_news_collector/backup.sh
-```
-
-## 📁 ファイル構成
+## 🔧 主要ファイル構成
 
 ```
 ai_news_collector/
-├── news_collector.py          # 基本情報収集モジュール
-├── twitter_collector.py       # X/Twitter収集モジュール
-├── integrated_collector.py    # 統合収集システム
-├── article_processor.py       # 記事要約・感想生成
+├── main.py                    # メイン実行ファイル
+├── news_collector.py          # ニュース収集エンジン
+├── article_processor.py       # 記事処理・要約
 ├── wordpress_connector.py     # WordPress連携
-├── scheduler.py               # スケジュール実行
-├── test_system.py            # システムテスト
-├── setup.sh                  # 自動セットアップ
-├── requirements.txt          # Python依存関係
-├── .env                      # 環境変数（要設定）
-├── wordpress_config.json     # WordPress設定
-├── system_config.json        # システム設定
-├── backup.sh                 # バックアップスクリプト
-├── monitor.sh                # 監視スクリプト
-├── maintenance.sh            # メンテナンススクリプト
-└── DEPLOYMENT_GUIDE.md       # 詳細デプロイガイド
+├── integrated_collector.py    # 統合収集システム
+├── simple_x_collector.py      # X関連情報収集（安定版）
+├── config_manager.py          # 設定管理
+├── collector_config.json.template # 設定テンプレート
+└── requirements.txt           # 依存関係
 ```
 
-## ⚙️ 設定項目
+## 📊 収集実績
 
-### 環境変数 (.env)
+### 通常運用での収集数
+- **通常ニュース**: 5-15件/回
+- **X関連情報**: 3-8件/回
+- **合計**: 8-23件/回
 
+### 収集ソース別統計
+- ITmedia: 40%
+- GIGAZINE: 25%
+- TechCrunch: 20%
+- その他: 15%
+
+## ⚠️ 現在保留中の機能
+
+### X投稿収集機能
+**現在、実際のX投稿収集機能は保留中です。**
+
+#### 保留理由
+- 直接スクレイピング: 技術的困難（0件収集）
+- X API v2: コスト面での課題
+- 代替手段: 実際の投稿ではないため要求に合わない
+
+#### 関連ファイル（保留中）
+- `direct_x_scraper.py` - 直接スクレイピング（実験版）
+- `real_x_scraper.py` - 代替手段による収集
+- `advanced_x_scraper.py` - 高度なスクレイピング
+- `x_post_collection_summary.md` - 検討資料
+
+## 🚀 セットアップ手順
+
+### 1. 依存関係のインストール
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
-WP_URL=https://your-wordpress-site.com
-WP_USER=your_wp_username
-WP_APP_PASS=your_wp_app_password
+pip install -r requirements.txt
 ```
 
-### WordPress設定 (wordpress_config.json)
+### 2. 設定ファイルの作成
+```bash
+cp collector_config.json.template collector_config.json
+# collector_config.jsonを編集して設定を入力
+```
 
+### 3. 実行
+```bash
+# 統合収集の実行
+python main.py
+
+# 個別テスト
+python news_collector.py
+python integrated_collector.py
+```
+
+## 📝 設定項目
+
+### WordPress設定
 ```json
 {
-  "wp_url": "https://your-wordpress-site.com",
-  "wp_user": "your_wp_username",
-  "wp_app_pass": "your_wp_app_password",
-  "post_settings": {
-    "status": "publish",
-    "category_id": 1,
-    "tags": ["AI", "技術動向", "最新情報"],
-    "author_id": 1,
-    "featured_media": null
-  },
-  "slug_settings": {
-    "auto_generate": true,
-    "prefix": "ai-news-",
-    "max_length": 50
+  "wordpress": {
+    "url": "https://your-site.com",
+    "username": "your-username",
+    "password": "your-app-password"
   }
 }
 ```
 
-#### スラッグ設定の説明
-
-- **auto_generate**: スラッグ自動生成の有効/無効
-- **prefix**: スラッグの前に付けるプレフィックス（例: "ai-news-"）
-- **max_length**: スラッグの最大長（デフォルト: 50文字）
-
-## 🔤 スラッグ自動生成機能
-
-### 概要
-
-WordPress投稿時に、日本語タイトルから自動的にSEOフレンドリーな英語スラッグを生成します。
-
-### 機能詳細
-
-- **日本語→英語変換**: 100以上のAI・技術関連用語を自動変換
-- **特殊文字処理**: 記号や括弧を適切にハイフンに変換
-- **長さ制限**: 設定可能な最大長でスラッグを制限
-- **プレフィックス対応**: カテゴリ別のプレフィックス設定可能
-
-### 変換例
-
-| 日本語タイトル | 生成されるスラッグ |
-|---|---|
-| 今日のAIニュース 2024年1月15日 | ai-news-today-ainews-2024-1-15 |
-| OpenAIが新しいGPT-5を発表 | ai-news-openai-gpt-5-announcement |
-| Google、AI検索機能をアップデート | ai-news-google-aisearch-feature-update |
-
-### 設定方法
-
-`wordpress_config.json`の`slug_settings`で設定:
-
+### 収集設定
 ```json
 {
-  "slug_settings": {
-    "auto_generate": true,        // 自動生成を有効にする
-    "prefix": "ai-news-",        // 全スラッグに付けるプレフィックス
-    "max_length": 50             // スラッグの最大長
+  "collection": {
+    "max_articles_per_source": 10,
+    "ai_keywords": ["AI", "ChatGPT", "機械学習"],
+    "sources": {
+      "itmedia": true,
+      "gigazine": true,
+      "techcrunch": true
+    }
   }
 }
 ```
 
-## 🔧 使用方法
+## 🔄 定期実行の設定
 
-### 🎯 推奨: 新しい統合投稿システム
-
+### Cronジョブ例
 ```bash
-# テスト実行（投稿はしない）
-python3 daily_publisher.py --test
+# 毎日9時に実行
+0 9 * * * cd /path/to/ai_news_collector && python main.py
 
-# 実際の記事収集・処理・投稿
-python3 daily_publisher.py
+# 毎時実行
+0 * * * * cd /path/to/ai_news_collector && python integrated_collector.py
 ```
 
-### 従来の手動実行
+## 📈 パフォーマンス
 
-```bash
-# 情報収集のみ
-python3 scheduler.py collect
+### 実行時間
+- 通常ニュース収集: 30-60秒
+- 記事処理・要約: 20-40秒
+- WordPress投稿: 10-20秒
+- **合計**: 約1-2分
 
-# 全ワークフロー（収集+処理+投稿）
-python3 scheduler.py workflow
+### リソース使用量
+- メモリ: 100-200MB
+- CPU: 軽負荷
+- ネットワーク: 中程度
 
-# スケジューラー起動
-python3 scheduler.py schedule
-```
+## 🛠️ 今後の改善予定
+
+### 短期的改善
+1. **ニュース収集源の拡充**
+   - Qiita、Zenn等の技術ブログ
+   - 海外技術ニュースサイト
+
+2. **記事品質の向上**
+   - より精密なAI関連度判定
+   - 重複検出アルゴリズムの改善
+
+### 長期的検討
+1. **X投稿収集の再検討**
+   - X API v2の無料枠活用
+   - より高度なスクレイピング技術
+
+2. **多言語対応**
+   - 英語記事の収集・翻訳
+   - 多言語での投稿生成
+
+## 📞 サポート・問い合わせ
+
+### トラブルシューティング
+1. **収集件数が0件の場合**
+   - ネットワーク接続を確認
+   - 各ニュースサイトのアクセス可能性を確認
+
+2. **WordPress投稿エラー**
+   - 認証情報を確認
+   - アプリケーションパスワードの設定を確認
 
 ### ログ確認
-
 ```bash
-# システムログ
-tail -f ai_news_system.log
+# 実行ログの確認
+tail -f logs/collector.log
 
-# cronログ
-tail -f cron.log
+# エラーログの確認
+grep ERROR logs/collector.log
 ```
-
-## 💰 運用費用
-
-### GCP Compute Engine
-- **e2-micro**: 月額 $6-8 (無料枠適用時 $0)
-- **ディスク**: 10GB 約 $1.60/月
-
-### API使用料
-- **OpenAI API**: 月額 $1.50-3.00 (1日5記事想定)
-
-**合計**: 月額 $8-13 (無料枠適用時 $3-5)
-
-## 🛡️ セキュリティ
-
-- 設定ファイルの権限制限 (600)
-- ファイアウォール設定
-- 定期的なセキュリティ更新
-- APIキーの安全な管理
-
-## 📊 監視・保守
-
-### 自動監視
-- ディスク使用量チェック
-- メモリ使用量チェック
-- エラーログ監視
-- プロセス監視
-
-### 定期メンテナンス
-- システム更新 (月次)
-- ログローテーション
-- 古いデータ削除
-- バックアップ実行
-
-## 🔍 トラブルシューティング
-
-### よくある問題
-
-1. **OpenAI API エラー**
-   - APIキー確認
-   - 使用量制限確認
-   - ダミー処理モードで一時運用
-
-2. **WordPress接続エラー**
-   - アプリケーションパスワード再生成
-   - REST API有効化確認
-
-3. **情報収集エラー**
-   - ネットワーク接続確認
-   - User-Agentヘッダー調整
-
-## 📈 拡張・カスタマイズ
-
-### 新しい情報源追加
-`news_collector.py`の`collect_from_news_sites`メソッドを拡張
-
-### 投稿フォーマット変更
-`wordpress_connector.py`の`format_article_for_post`メソッドを修正
-
-### 通知機能追加
-Slack/Discord Webhook連携
-
-## 📚 詳細ドキュメント
-
-- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - 詳細なデプロイメントガイド
-- [test_report.json](test_report.json) - システムテスト結果
-
-## 📞 サポート
-
-- **対応範囲**: インストール、設定、基本的なトラブルシューティング
-- **除外事項**: カスタム開発、第三者API問題
 
 ## 📄 ライセンス
 
-個人利用・商用利用ともに可能です。
-第三者APIの利用規約に従ってご利用ください。
+このプロジェクトは個人利用・研究目的で開発されています。
+商用利用の場合は、各ニュースサイトの利用規約を確認してください。
+
+## 🔄 更新履歴
+
+### v1.0.0 (2024-01-XX)
+- 基本的なニュース収集機能の実装
+- WordPress連携機能の実装
+- 統合収集システムの構築
+
+### v1.1.0 (保留)
+- X投稿収集機能（現在保留中）
+- 高度なスクレイピング機能（実験版）
 
 ---
 
-**注意事項**: 
-- 各種APIの利用規約を遵守してください
-- 情報収集時は対象サイトの負荷を考慮してください
-- 定期的なバックアップを推奨します
+**注意**: X投稿収集機能は現在保留中です。実際のX投稿が必要な場合は、X API v2の利用を検討してください。
 

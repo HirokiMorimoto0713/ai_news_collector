@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # テスト実行
     async def test_x_api():
         print("=== X API v2 テスト ===")
-        articles = await collect_x_posts_api(max_articles=3, min_likes=1)
+        articles = await collect_x_posts_api(max_articles=3, min_likes=0)
         
         for i, article in enumerate(articles, 1):
             print(f"\n{i}. {article.title}")

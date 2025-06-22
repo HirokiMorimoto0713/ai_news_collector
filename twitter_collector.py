@@ -240,7 +240,7 @@ class AlternativeTwitterCollector:
                     published_date=datetime.now().isoformat()
                 )
                 articles.append(article)
-                
+        
             print(f"X関連話題を {len(articles)} 件生成")
                 
         except Exception as e:
@@ -438,20 +438,39 @@ async def collect_twitter_articles(use_api: bool = False, min_likes: int = 30, m
     """X/Twitterから記事を収集（メイン関数）"""
     
     if use_api:
-        # X API v2を使用した実際の投稿収集
+        # 1. twitterapi.io を最優先で使用
+        try:
+            from twitterapi_io_collector import collect_x_posts_twitterapi_io
+            print("twitterapi.io を使用して投稿を収集中...")
+            articles = await collect_x_posts_twitterapi_io(max_articles=max_articles, min_likes=min_likes)
+            if articles:  # 記事が取得できた場合
+                return articles
+            else:
+                print("twitterapi.io: 投稿が取得できませんでした")
+        except ImportError:
+            print("twitterapi.io モジュールが見つかりません")
+        except Exception as e:
+            print(f"twitterapi.io 収集エラー: {e}")
+        
+        # 2. X API v2 をフォールバックとして使用
         try:
             from x_api_collector import collect_x_posts_api
-            print("X API v2を使用して投稿を収集中...")
-            return await collect_x_posts_api(max_articles=max_articles, min_likes=min_likes)
+            print("フォールバック: X API v2を使用して投稿を収集中...")
+            articles = await collect_x_posts_api(max_articles=max_articles, min_likes=min_likes)
+            if articles:  # 記事が取得できた場合
+                return articles
+            else:
+                print("X API v2: 投稿が取得できませんでした")
         except Exception as e:
             print(f"X API収集エラー: {e}")
-            print("代替手段にフォールバック...")
-            # 代替手段での収集
-            collector = AlternativeTwitterCollector()
-            articles = collector.collect_from_tech_news_about_twitter(min_likes, max_articles)
-            return articles
+        
+        # 3. 最終フォールバック: 代替手段を使用
+        print("最終フォールバック: 代替手段を使用します")
+        collector = AlternativeTwitterCollector()
+        articles = collector.collect_from_tech_news_about_twitter(min_likes, max_articles)
+        return articles
     else:
-        # 代替手段での収集
+        # 代替手段での収集（X API使用しない場合のみ）
         collector = AlternativeTwitterCollector()
         articles = collector.collect_from_tech_news_about_twitter(min_likes, max_articles)
         return articles
