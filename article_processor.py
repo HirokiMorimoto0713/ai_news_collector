@@ -259,13 +259,11 @@ class ArticleProcessor:
             return "この技術により、ユーザーはより便利で効率的なAI体験を得ることができそうです。"
     
     def process_article(self, article: NewsArticle) -> ProcessedArticle:
-        """記事を処理（要約+感想生成+翻訳+プレビュー）"""
+        """記事を処理（要約+感想生成+プレビュー）"""
         print(f"記事処理中: {article.title}")
         
-        # タイトル翻訳（英語の場合）
-        translated_title = self.translate_english_title(article.title)
-        if translated_title != article.title:
-            print(f"タイトル翻訳完了: {len(translated_title)}文字")
+        # 日本語記事のみを収集しているため、タイトル翻訳はスキップ
+        translated_title = article.title  # 元のタイトルをそのまま使用
         
         # 本文プレビュー作成
         content_preview = self.create_content_preview(article.content)
