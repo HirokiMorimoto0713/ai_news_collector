@@ -373,79 +373,106 @@ class DailyPostGenerator:
     def __init__(self, wp_connector: WordPressConnector):
         self.wp_connector = wp_connector
     
-    def format_article_for_post(self, processed_article: ProcessedArticle) -> str:
-        """記事を投稿用にフォーマット"""
+    def format_article_for_post(self, processed_article: ProcessedArticle, article_number: int) -> str:
+        """記事を投稿用にフォーマット（HTMLタグ使用）"""
         article = processed_article.original_article
         
-        # 記事タイトルから簡潔な見出しを生成
-        title_words = article.title.split('、')[0].split('が')[0].split('の')[0]
-        if len(title_words) > 20:
-            title_words = title_words[:20] + "..."
+        # ソース名を整形
+        source_name = getattr(article, 'source', 'Unknown').title()
+        if source_name == 'Unknown':
+            # URLからソース名を推定
+            if 'venturebeat' in article.url.lower():
+                source_name = 'Venturebeat'
+            elif 'cnet' in article.url.lower():
+                source_name = 'Cnet_Japan'
+            elif 'nikkei' in article.url.lower():
+                source_name = 'Nikkei'
+            elif 'ascii' in article.url.lower():
+                source_name = 'ASCII'
+            elif 'itmedia' in article.url.lower():
+                source_name = 'ITmedia'
+            else:
+                source_name = 'Tech News'
         
-        formatted_content = f"""
+        # 記事タイトル（翻訳済みがあれば使用）
+        display_title = getattr(processed_article, 'translated_title', '') or article.title
+        
+        # 要約と感想の改行を適切に処理（HTML化）
+        summary_html = processed_article.summary.replace('\n', '<br>\n')
+        comment_html = processed_article.user_value_comment.replace('\n', '<br>\n')
+        
+        formatted_content = f"""<h2>📰 {article_number}. {display_title}</h2>
+
 <blockquote>
-<p>{article.content}</p>
-<footer>— <cite><a href="{article.url}" target="_blank">元のポストを見る</a></cite></footer>
+<strong>ソース:</strong> {source_name}<br>
+<strong>元タイトル:</strong> {article.title}<br>
+<br>
+<a href="{article.url}" target="_blank">📖 元記事を読む →</a>
 </blockquote>
 
-<h4>📝 要約</h4>
-<p>{processed_article.summary}</p>
+<p>ソース: {source_name}</p>
 
-<h4>💡 ユーザーへの具体的な影響</h4>
-<p>{processed_article.user_value_comment}</p>
+<h4>🔍 記事プレビュー</h4>
+
+<p>{getattr(processed_article, 'content_preview', '') or article.content[:200] + '...'}</p>
+
+<h3>📝 記事の要約</h3>
+
+<p>{summary_html}</p>
+
+<h3>💡 私たちへの影響と今後の展望</h3>
+
+<p>{comment_html}</p>
 
 <hr>
+
 """
         return formatted_content
     
-    def generate_daily_post_content(self, processed_articles: List[ProcessedArticle]) -> Dict[str, str]:
-        """1日分の投稿コンテンツを生成"""
-        today = datetime.now().strftime('%Y年%m月%d日')
+    def generate_daily_post_content(self, processed_articles: List[ProcessedArticle]) -> Dict:
+        """1日分の投稿コンテンツを生成（HTMLタグ使用）"""
+        today = datetime.now()
         
-        # タイトル生成
-        title = f"今日のAIニュース {today}"
+        # タイトル生成（正しい形式）
+        title = f"今日のAIニュース {len(processed_articles)}選 – {today.strftime('%Y年%m月%d日')}"
         
         # 導入文
-        intro = f"""
-<p>こんにちは！今日も最新のAI情報をお届けします。</p>
+        intro = f"""<p>こんにちは！今日も最新のAI情報をお届けします！</p>
 
-<p>本日は{len(processed_articles)}件の注目記事をピックアップしました。<br>
-それぞれの記事について、わかりやすい要約と「私たちの生活にどんな影響があるか」という視点でご紹介していきます。</p>
+<p>本日は{len(processed_articles)}件の注目すべきAIニュースをピックアップしました。それぞれのニュースについて、要約と私たちへの影響を分析してお伝えします。</p>
+
 """
+        
+        # 目次生成
+        toc = "<h2>目次</h2>\n\n"
+        for i, processed_article in enumerate(processed_articles, 1):
+            article_title = getattr(processed_article, 'translated_title', '') or processed_article.original_article.title
+            # タイトルを短縮
+            if len(article_title) > 50:
+                short_title = article_title[:50] + "..."
+            else:
+                short_title = article_title
+            toc += f"<p><strong>{i}. {short_title}</strong></p>\n\n"
+        
+        toc += "\n"
         
         # 各記事のコンテンツ
         articles_content = ""
         for i, processed_article in enumerate(processed_articles, 1):
-            # 記事タイトルから簡潔な見出しを生成
-            article_title = processed_article.original_article.title
-            # タイトルを短縮して見出しに適した形にする
-            if '、' in article_title:
-                heading = article_title.split('、')[0]
-            elif 'が' in article_title:
-                heading = article_title.split('が')[0] + 'の動向'
-            elif 'を' in article_title:
-                heading = article_title.split('を')[0] + 'について'
-            else:
-                heading = article_title[:30] + ('...' if len(article_title) > 30 else '')
-            
-            articles_content += f"<h2>📰 {heading}</h2>\n"
-            articles_content += self.format_article_for_post(processed_article)
+            articles_content += self.format_article_for_post(processed_article, i)
         
         # まとめ
-        conclusion = f"""
-<h2>🎯 今日のまとめ</h2>
-<p>今日は{len(processed_articles)}件のAI関連記事をご紹介しました。</p>
+        conclusion = f"""<h2>🎯 今日のまとめ</h2>
 
-<p>これらの技術は、私たちの日常生活やお仕事をもっと便利で効率的にしてくれそうですね。<br>
-AI技術がどんどん進歩することで、みなさんもより使いやすいツールを手に入れることができ、<br>
-創造性や生産性がアップすることが期待できます。</p>
+<p>いかがでしたでしょうか？今日も様々なAI技術の進歩が見られましたね！</p>
 
-<p>明日も最新のAI情報をお届けしますので、ぜひお楽しみに！<br>
-気になる記事があれば、ぜひコメントで教えてくださいね。</p>
+<p>これらの技術動向は、私たちの日常生活や仕事に大きな変化をもたらす可能性があります。ぜひこの情報を参考に、AI技術を積極的に活用していってください。</p>
+
+<p>他にも気になるAI情報がありましたら、ぜひコメントで教えてくださいね！明日もお楽しみに！</p>
 """
         
         # 全体のコンテンツ
-        full_content = intro + articles_content + conclusion
+        full_content = intro + toc + articles_content + conclusion
         
         # 抜粋（excerpt）
         excerpt = f"今日のAI情報まとめです！{len(processed_articles)}件の注目記事を、わかりやすい要約と私たちの生活への影響という視点でご紹介しています。"
@@ -473,7 +500,7 @@ AI技術がどんどん進歩することで、みなさんもより使いやす
             title=post_content['title'],
             content=post_content['content'],
             excerpt=post_content['excerpt'],
-            tags=["AI", "技術動向", "まとめ", "最新情報"]
+            tags=["AI", "AIニュース", "まとめ", "技術動向", "最新情報"]
         )
         
         if post_info:
