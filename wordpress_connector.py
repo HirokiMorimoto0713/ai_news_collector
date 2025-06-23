@@ -394,8 +394,8 @@ class DailyPostGenerator:
             else:
                 source_name = 'Tech News'
         
-        # 記事タイトル（翻訳済みがあれば使用）
-        display_title = getattr(processed_article, 'translated_title', '') or article.title
+        # 日本語記事のため元のタイトルをそのまま使用
+        display_title = article.title
         
         # 要約と感想の改行を適切に処理（HTML化）
         summary_html = processed_article.summary.replace('\n', '<br>\n')
@@ -446,7 +446,8 @@ class DailyPostGenerator:
         # 目次生成
         toc = "<h2>目次</h2>\n\n"
         for i, processed_article in enumerate(processed_articles, 1):
-            article_title = getattr(processed_article, 'translated_title', '') or processed_article.original_article.title
+            # 日本語記事のため元のタイトルをそのまま使用
+            article_title = processed_article.original_article.title
             # タイトルを短縮
             if len(article_title) > 50:
                 short_title = article_title[:50] + "..."
