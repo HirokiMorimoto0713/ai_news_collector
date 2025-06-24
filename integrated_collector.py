@@ -156,30 +156,57 @@ class IntegratedAICollector:
         """全ソースから記事を収集"""
         all_articles = []
         
-        print("🚀 統合記事収集開始")
+        print("AI関連情報の収集を開始...")
         
-        # 既存のニュース収集
+        # 1. 高度スクレイピング（並列処理）
         try:
-            collector = AINewsCollector()
-            regular_articles = collector.collect_daily_articles()
-            all_articles.extend(regular_articles)
-            print(f"📰 通常ニュース: {len(regular_articles)}件")
+            from advanced_scraper import AdvancedScraper
+            advanced_scraper = AdvancedScraper(max_concurrent=15)
+            
+            # 古いキャッシュを削除
+            advanced_scraper.clear_cache(max_age_days=1)
+            
+            # 高度スクレイピング実行
+            advanced_articles = await advanced_scraper.collect_all_articles(max_total_articles=20)
+            
+            # AdvancedArticleをNewsArticleに変換
+            converted_articles = []
+            for adv_article in advanced_articles:
+                from news_collector import NewsArticle
+                article = NewsArticle(
+                    title=adv_article.title,
+                    url=adv_article.url,
+                    content=adv_article.content,
+                    source=adv_article.source,
+                    published_date=adv_article.published_date or datetime.now().isoformat()
+                )
+                converted_articles.append(article)
+            
+            all_articles.extend(converted_articles)
+            print(f"⚡ 高度スクレイピング: {len(converted_articles)}件")
+            
         except Exception as e:
-            print(f"❌ 通常ニュース収集エラー: {e}")
+            print(f"❌ 高度スクレイピングエラー: {e}")
+            
+            # フォールバック: 通常のスクレイピング
+            try:
+                collector = AINewsCollector()
+                regular_articles = collector.collect_daily_articles()
+                all_articles.extend(regular_articles)
+                print(f"📰 フォールバック収集: {len(regular_articles)}件")
+            except Exception as e2:
+                print(f"❌ フォールバック収集エラー: {e2}")
         
         # X関連情報収集 - 完全無効化
         # ユーザー要求により、X風の情報も含めて全て無効化
         print(f"⚠️ X関連情報収集は無効化されています（ユーザー要求）")
         
-        # try:
-        #     x_articles = await self.collect_x_related_information(max_posts=3)
-        #     all_articles.extend(x_articles)
-        #     print(f"📱 X関連情報: {len(x_articles)}件")
-        # except Exception as e:
-        #     print(f"❌ X関連情報収集エラー: {e}")
+        # 24時間フィルタを適用
+        filtered_articles = self.filter_by_time(all_articles, 24)
+        print(f"🔍 フィルタリング後: {len(filtered_articles)}件")
         
-        print(f"📊 総合計: {len(all_articles)}件の記事を収集")
-        return all_articles
+        print(f"📊 総合計: {len(filtered_articles)}件の高品質記事を収集")
+        return filtered_articles
     
     def remove_duplicates(self, articles: List[NewsArticle]) -> List[NewsArticle]:
         """重複記事を除去"""
@@ -265,7 +292,7 @@ async def collect_all_ai_news():
     # 1. 通常のニュース収集のみ
     try:
         print("\n📰 通常ニュース収集中...")
-        from news_collector import collect_news
+        from news_collector import AINewsCollector
         news_articles = await collect_news()
         all_articles.extend(news_articles)
         print(f"✅ 通常ニュース: {len(news_articles)}件")
