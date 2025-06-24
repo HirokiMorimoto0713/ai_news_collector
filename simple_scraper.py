@@ -25,66 +25,66 @@ class SimpleScraper:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
-        # 情報源の設定（大幅に拡張 - 30以上のサイト）
+        # 情報源の設定（日本語サイト中心に大幅拡張）
         self.sources = {
-            # 日本語サイト（大幅拡張）
+            # 主要日本語ITニュースサイト
             'itmedia': {
                 'base_url': 'https://www.itmedia.co.jp',
                 'search_url': 'https://www.itmedia.co.jp/news/subtop/aiplus/',
                 'article_selector': 'h2.title a',
                 'content_selector': '.inner p',
-                'max_articles': 3
+                'max_articles': 4
             },
             'gigazine': {
                 'base_url': 'https://gigazine.net',
                 'search_url': 'https://gigazine.net/news/tags/AI/',
                 'article_selector': 'h2 a',
                 'content_selector': '.preface, .article p',
-                'max_articles': 3
+                'max_articles': 4
             },
             'impress_watch': {
                 'base_url': 'https://pc.watch.impress.co.jp',
                 'search_url': 'https://pc.watch.impress.co.jp/docs/news/',
                 'article_selector': 'h3 a, h2 a',
                 'content_selector': '.body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'ascii': {
                 'base_url': 'https://ascii.jp',
                 'search_url': 'https://ascii.jp/tech/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'mynavi': {
                 'base_url': 'https://news.mynavi.jp',
                 'search_url': 'https://news.mynavi.jp/techplus/technology/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'nikkei_xtech': {
                 'base_url': 'https://xtech.nikkei.com',
                 'search_url': 'https://xtech.nikkei.com/atcl/nxt/news/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             
-            # 追加日本語サイト
+            # 日本語AI専門サイト・技術サイト
             'cnet_japan': {
                 'base_url': 'https://japan.cnet.com',
                 'search_url': 'https://japan.cnet.com/tag/ai/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'internet_watch': {
                 'base_url': 'https://internet.watch.impress.co.jp',
                 'search_url': 'https://internet.watch.impress.co.jp/docs/news/',
                 'article_selector': 'h3 a, h2 a',
                 'content_selector': '.body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'forest_watch': {
                 'base_url': 'https://forest.watch.impress.co.jp',
@@ -98,399 +98,302 @@ class SimpleScraper:
                 'search_url': 'https://akiba-pc.watch.impress.co.jp/docs/news/',
                 'article_selector': 'h3 a, h2 a',
                 'content_selector': '.body p',
-                'max_articles': 1
+                'max_articles': 2
             },
             'itmedia_mobile': {
                 'base_url': 'https://www.itmedia.co.jp',
                 'search_url': 'https://www.itmedia.co.jp/mobile/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.inner p',
-                'max_articles': 1
+                'max_articles': 2
             },
             'itmedia_enterprise': {
                 'base_url': 'https://www.itmedia.co.jp',
                 'search_url': 'https://www.itmedia.co.jp/enterprise/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.inner p',
-                'max_articles': 1
+                'max_articles': 2
             },
             'robotstart': {
                 'base_url': 'https://robotstart.info',
                 'search_url': 'https://robotstart.info/category/ai',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.entry-content p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'ledge_ai': {
                 'base_url': 'https://ledge.ai',
                 'search_url': 'https://ledge.ai/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.entry-content p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'ainow': {
                 'base_url': 'https://ainow.ai',
                 'search_url': 'https://ainow.ai/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.entry-content p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'aismiley': {
                 'base_url': 'https://aismiley.co.jp',
                 'search_url': 'https://aismiley.co.jp/ai_news/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.entry-content p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'codezine': {
                 'base_url': 'https://codezine.jp',
                 'search_url': 'https://codezine.jp/tag/ai',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'publickey': {
                 'base_url': 'https://www.publickey1.jp',
                 'search_url': 'https://www.publickey1.jp/blog/ai/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.entry-content p',
-                'max_articles': 2
+                'max_articles': 3
             },
             'gihyo': {
                 'base_url': 'https://gihyo.jp',
                 'search_url': 'https://gihyo.jp/news',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.entry-content p',
-                'max_articles': 1
+                'max_articles': 2
             },
             'atmarkit': {
                 'base_url': 'https://atmarkit.itmedia.co.jp',
                 'search_url': 'https://atmarkit.itmedia.co.jp/ait/subtop/features/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.inner p',
-                'max_articles': 1
+                'max_articles': 2
             },
             'techplus': {
                 'base_url': 'https://news.mynavi.jp',
                 'search_url': 'https://news.mynavi.jp/techplus/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
-                'max_articles': 2
-            },
-            
-            # 海外メジャーサイト
-            'techcrunch': {
-                'base_url': 'https://techcrunch.com',
-                'search_url': 'https://techcrunch.com/category/artificial-intelligence/',
-                'article_selector': 'h2 a',
-                'content_selector': '.article-content p',
                 'max_articles': 3
             },
-            'venturebeat': {
-                'base_url': 'https://venturebeat.com',
-                'search_url': 'https://venturebeat.com/ai/',
+            
+            # 追加日本語サイト（大幅拡張）
+            'watch_impress': {
+                'base_url': 'https://www.watch.impress.co.jp',
+                'search_url': 'https://www.watch.impress.co.jp/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.article-content p',
-                'max_articles': 3
-            },
-            'arstechnica': {
-                'base_url': 'https://arstechnica.com',
-                'search_url': 'https://arstechnica.com/tag/artificial-intelligence/',
-                'article_selector': 'h2 a',
-                'content_selector': '.post-content p',
-                'max_articles': 3
-            },
-            'theverge': {
-                'base_url': 'https://www.theverge.com',
-                'search_url': 'https://www.theverge.com/ai-artificial-intelligence',
-                'article_selector': 'h2 a',
-                'content_selector': '.duet--article--article-body p',
+                'content_selector': '.body p',
                 'max_articles': 2
             },
-            'wired': {
-                'base_url': 'https://www.wired.com',
-                'search_url': 'https://www.wired.com/tag/artificial-intelligence/',
+            'itmedia_business': {
+                'base_url': 'https://www.itmedia.co.jp',
+                'search_url': 'https://www.itmedia.co.jp/business/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.post-content p',
+                'content_selector': '.inner p',
                 'max_articles': 2
             },
-            'zdnet': {
-                'base_url': 'https://www.zdnet.com',
-                'search_url': 'https://www.zdnet.com/topic/artificial-intelligence/',
+            'nikkei_tech': {
+                'base_url': 'https://www.nikkei.com',
+                'search_url': 'https://www.nikkei.com/technology/',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'engadget': {
-                'base_url': 'https://www.engadget.com',
-                'search_url': 'https://www.engadget.com/tag/ai/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.post-content p',
-                'max_articles': 2
-            },
-            
-            # AI専門サイト
-            'ainews': {
-                'base_url': 'https://www.artificialintelligence-news.com',
-                'search_url': 'https://www.artificialintelligence-news.com/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 2
-            },
-            'towards_data_science': {
-                'base_url': 'https://towardsdatascience.com',
-                'search_url': 'https://towardsdatascience.com/tagged/artificial-intelligence',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.section-content p',
-                'max_articles': 2
-            },
-            'machine_learning_mastery': {
-                'base_url': 'https://machinelearningmastery.com',
-                'search_url': 'https://machinelearningmastery.com/blog/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 2
-            },
-            
-            # ビジネス・ニュースサイト
-            'reuters': {
-                'base_url': 'https://www.reuters.com',
-                'search_url': 'https://www.reuters.com/technology/',
-                'article_selector': 'h3 a, h2 a',
-                'content_selector': '.article-body p',
-                'max_articles': 2
-            },
-            'bloomberg': {
-                'base_url': 'https://www.bloomberg.com',
-                'search_url': 'https://www.bloomberg.com/technology',
-                'article_selector': 'h3 a, h2 a',
-                'content_selector': '.article-body p',
-                'max_articles': 2
-            },
-            'cnbc': {
-                'base_url': 'https://www.cnbc.com',
-                'search_url': 'https://www.cnbc.com/technology/',
-                'article_selector': 'h3 a, h2 a',
-                'content_selector': '.ArticleBody-articleBody p',
-                'max_articles': 2
-            },
-            'cnn_business': {
-                'base_url': 'https://www.cnn.com',
-                'search_url': 'https://www.cnn.com/business/tech',
-                'article_selector': 'h3 a, h2 a',
-                'content_selector': '.article-body p',
-                'max_articles': 2
-            },
-            
-            # 学術・研究系
-            'mit_tech_review': {
-                'base_url': 'https://www.technologyreview.com',
-                'search_url': 'https://www.technologyreview.com/topic/artificial-intelligence/',
+            'diamond_online': {
+                'base_url': 'https://diamond.jp',
+                'search_url': 'https://diamond.jp/category/technology',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'nature': {
-                'base_url': 'https://www.nature.com',
-                'search_url': 'https://www.nature.com/subjects/machine-learning',
-                'article_selector': 'h3 a, h2 a',
-                'content_selector': '.article-body p',
-                'max_articles': 1
-            },
-            'science_daily': {
-                'base_url': 'https://www.sciencedaily.com',
-                'search_url': 'https://www.sciencedaily.com/news/computers_math/artificial_intelligence/',
-                'article_selector': 'h3 a, h2 a',
-                'content_selector': '.article-text p',
-                'max_articles': 2
-            },
-            
-            # 開発者向け
-            'dev_to': {
-                'base_url': 'https://dev.to',
-                'search_url': 'https://dev.to/t/ai',
+            'toyokeizai': {
+                'base_url': 'https://toyokeizai.net',
+                'search_url': 'https://toyokeizai.net/category/technology',
                 'article_selector': 'h2 a, h3 a',
                 'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'hackernews': {
-                'base_url': 'https://news.ycombinator.com',
-                'search_url': 'https://hn.algolia.com/?query=AI&type=story',
-                'article_selector': 'a.storylink',
-                'content_selector': '.comment p',
-                'max_articles': 1
-            },
-            'medium': {
-                'base_url': 'https://medium.com',
-                'search_url': 'https://medium.com/tag/artificial-intelligence',
+            'business_insider_japan': {
+                'base_url': 'https://www.businessinsider.jp',
+                'search_url': 'https://www.businessinsider.jp/category/tech',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.section-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            
-            # 企業ブログ
-            'openai_blog': {
-                'base_url': 'https://openai.com',
-                'search_url': 'https://openai.com/blog/',
+            'yahoo_news_tech': {
+                'base_url': 'https://news.yahoo.co.jp',
+                'search_url': 'https://news.yahoo.co.jp/categories/it',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.article-content p',
-                'max_articles': 1
-            },
-            'google_ai': {
-                'base_url': 'https://ai.googleblog.com',
-                'search_url': 'https://ai.googleblog.com/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.post-body p',
-                'max_articles': 1
-            },
-            'microsoft_ai': {
-                'base_url': 'https://blogs.microsoft.com',
-                'search_url': 'https://blogs.microsoft.com/ai/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 1
-            },
-            'anthropic_blog': {
-                'base_url': 'https://www.anthropic.com',
-                'search_url': 'https://www.anthropic.com/news',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.article-content p',
-                'max_articles': 1
-            },
-            
-                         # 追加の海外サイト
-             'nextbigfuture': {
-                'base_url': 'https://www.nextbigfuture.com',
-                'search_url': 'https://www.nextbigfuture.com/category/artificial-intelligence',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'singularityhub': {
-                'base_url': 'https://singularityhub.com',
-                'search_url': 'https://singularityhub.com/topic/artificial-intelligence/',
+            'zaikei': {
+                'base_url': 'https://www.zaikei.co.jp',
+                'search_url': 'https://www.zaikei.co.jp/category/technology/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            
-            # 専門分野別サイト
-            'ai_research': {
-                'base_url': 'https://www.ai-research.com',
-                'search_url': 'https://www.ai-research.com/news',
+            'jiji_tech': {
+                'base_url': 'https://www.jiji.com',
+                'search_url': 'https://www.jiji.com/jc/list?g=eco',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'deeplearning_ai': {
-                'base_url': 'https://www.deeplearning.ai',
-                'search_url': 'https://www.deeplearning.ai/blog/',
+            'kyodo_tech': {
+                'base_url': 'https://this.kiji.is',
+                'search_url': 'https://this.kiji.is/technology',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'sankei_tech': {
+                'base_url': 'https://www.sankei.com',
+                'search_url': 'https://www.sankei.com/economy/technology/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'mainichi_tech': {
+                'base_url': 'https://mainichi.jp',
+                'search_url': 'https://mainichi.jp/tech/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'asahi_tech': {
+                'base_url': 'https://www.asahi.com',
+                'search_url': 'https://www.asahi.com/tech/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'yomiuri_tech': {
+                'base_url': 'https://www.yomiuri.co.jp',
+                'search_url': 'https://www.yomiuri.co.jp/science/technology/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'nhk_tech': {
+                'base_url': 'https://www3.nhk.or.jp',
+                'search_url': 'https://www3.nhk.or.jp/news/tech/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'newswitch': {
+                'base_url': 'https://newswitch.jp',
+                'search_url': 'https://newswitch.jp/category/technology',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'fabcross': {
+                'base_url': 'https://fabcross.jp',
+                'search_url': 'https://fabcross.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'monoist': {
+                'base_url': 'https://monoist.itmedia.co.jp',
+                'search_url': 'https://monoist.itmedia.co.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.inner p',
+                'max_articles': 2
+            },
+            'eetimes_japan': {
+                'base_url': 'https://eetimes.itmedia.co.jp',
+                'search_url': 'https://eetimes.itmedia.co.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.inner p',
+                'max_articles': 2
+            },
+            'ednjapan': {
+                'base_url': 'https://ednjapan.com',
+                'search_url': 'https://ednjapan.com/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'techfactory': {
+                'base_url': 'https://techfactory.itmedia.co.jp',
+                'search_url': 'https://techfactory.itmedia.co.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.inner p',
+                'max_articles': 2
+            },
+            'techtarget': {
+                'base_url': 'https://techtarget.itmedia.co.jp',
+                'search_url': 'https://techtarget.itmedia.co.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.inner p',
+                'max_articles': 2
+            },
+            'keyman': {
+                'base_url': 'https://keyman.or.jp',
+                'search_url': 'https://keyman.or.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
+                'max_articles': 2
+            },
+            'cloud_watch': {
+                'base_url': 'https://cloud.watch.impress.co.jp',
+                'search_url': 'https://cloud.watch.impress.co.jp/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.body p',
+                'max_articles': 2
+            },
+            'security_next': {
+                'base_url': 'https://www.security-next.com',
+                'search_url': 'https://www.security-next.com/',
+                'article_selector': 'h2 a, h3 a',
+                'content_selector': '.article-body p',
                 'max_articles': 1
             },
-            'ai_news_com': {
-                'base_url': 'https://www.ai-news.com',
-                'search_url': 'https://www.ai-news.com/',
+            'scan_netsecurity': {
+                'base_url': 'https://scan.netsecurity.ne.jp',
+                'search_url': 'https://scan.netsecurity.ne.jp/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 2
-            },
-            'ml_news': {
-                'base_url': 'https://www.ml-news.com',
-                'search_url': 'https://www.ml-news.com/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 2
-            },
-            'robotics_business': {
-                'base_url': 'https://www.roboticsbusinessreview.com',
-                'search_url': 'https://www.roboticsbusinessreview.com/ai/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 2
-            },
-            'healthcare_ai': {
-                'base_url': 'https://www.healthcareaimagazine.com',
-                'search_url': 'https://www.healthcareaimagazine.com/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 1
             },
-            'fintech_ai': {
-                'base_url': 'https://www.fintechmagazine.com',
-                'search_url': 'https://www.fintechmagazine.com/ai',
+            'dime': {
+                'base_url': 'https://dime.jp',
+                'search_url': 'https://dime.jp/genre/technology/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 1
-            },
-            
-            # 地域別サイト（アジア太平洋）
-            'asia_tech': {
-                'base_url': 'https://www.techinasia.com',
-                'search_url': 'https://www.techinasia.com/topic/artificial-intelligence',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'kr_aitimes': {
-                'base_url': 'https://www.aitimes.kr',
-                'search_url': 'https://www.aitimes.kr/',
+            'getnavijp': {
+                'base_url': 'https://getnavi.jp',
+                'search_url': 'https://getnavi.jp/digital/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 1
-            },
-            'china_ai': {
-                'base_url': 'https://www.chinaai.com',
-                'search_url': 'https://www.chinaai.com/news',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'singapore_tech': {
-                'base_url': 'https://www.sgtechreview.com',
-                'search_url': 'https://www.sgtechreview.com/ai/',
+            'bcnretail': {
+                'base_url': 'https://www.bcnretail.com',
+                'search_url': 'https://www.bcnretail.com/news/detail/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 1
-            },
-            
-            # 地域別サイト（ヨーロッパ）
-            'eu_ai_watch': {
-                'base_url': 'https://www.ai-watch.eu',
-                'search_url': 'https://www.ai-watch.eu/news',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 1
-            },
-            'uk_ai_news': {
-                'base_url': 'https://www.ukainews.com',
-                'search_url': 'https://www.ukainews.com/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 2
             },
-            'german_ai': {
-                'base_url': 'https://www.ki-news.de',
-                'search_url': 'https://www.ki-news.de/',
+            'ipa_go_jp': {
+                'base_url': 'https://www.ipa.go.jp',
+                'search_url': 'https://www.ipa.go.jp/about/press/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 1
             },
-            
-            # スタートアップ・ベンチャー系
-            'startup_ai': {
-                'base_url': 'https://www.startupai.com',
-                'search_url': 'https://www.startupai.com/news',
+            'nisc_go_jp': {
+                'base_url': 'https://www.nisc.go.jp',
+                'search_url': 'https://www.nisc.go.jp/news/',
                 'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
-                'max_articles': 2
-            },
-            'vc_ai': {
-                'base_url': 'https://www.vcai.news',
-                'search_url': 'https://www.vcai.news/',
-                'article_selector': 'h2 a, h3 a',
-                'content_selector': '.entry-content p',
+                'content_selector': '.article-body p',
                 'max_articles': 1
             }
         }

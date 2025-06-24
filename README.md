@@ -21,6 +21,7 @@ AIに関するニュースを自動収集し、WordPressに投稿するシステ
 
 ### 3. WordPress連携
 - **自動投稿**: 収集した記事のWordPress投稿
+- **アイキャッチ画像生成**: DALL·E 3によるアイキャッチ画像の自動生成
 - **カテゴリ分類**: AI関連カテゴリへの自動分類
 - **メタデータ設定**: SEO対応のメタ情報設定
 
@@ -102,12 +103,23 @@ python integrated_collector.py
 ### WordPress設定
 ```json
 {
-  "wordpress": {
-    "url": "https://your-site.com",
-    "username": "your-username",
-    "password": "your-app-password"
+  "wp_url": "https://your-site.com",
+  "wp_user": "your-username",
+  "wp_app_pass": "your-app-password",
+  "post_settings": {
+    "status": "publish",
+    "category_id": 1,
+    "tags": ["AI", "技術動向", "最新情報"],
+    "author_id": 1,
+    "generate_featured_image": true
   }
 }
+```
+
+### OpenAI設定（アイキャッチ画像生成用）
+環境変数または設定ファイルで設定：
+```bash
+OPENAI_API_KEY=your_openai_api_key
 ```
 
 ### 収集設定

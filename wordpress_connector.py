@@ -13,6 +13,11 @@ from urllib.parse import urljoin
 from dotenv import load_dotenv
 import re
 import unicodedata
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import logging
+import openai
+from io import BytesIO
 
 # 環境変数を読み込み
 load_dotenv()
@@ -26,6 +31,19 @@ class WordPressConnector:
         self.config = self.load_config(config_file)
         self.session = requests.Session()
         self.setup_authentication()
+        
+        # OpenAI設定
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        
+        # リトライ設定
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
     
     def generate_slug(self, title: str) -> str:
         """タイトルからWordPressスラッグを生成"""
@@ -308,8 +326,140 @@ class WordPressConnector:
         
         return tag_ids
     
+    def generate_featured_image_prompt(self, title: str, content: str = "") -> str:
+        """
+        記事タイトルと内容からアイキャッチ画像生成プロンプトを作成
+        """
+        try:
+            resp = openai.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "あなたは画像プロンプト作成のエキスパートです。"
+                            "AIニュース記事のアイキャッチ画像に適した、プロフェッショナルで"
+                            "魅力的な画像を生成するための英語プロンプトを1文で答えてください。\n\n"
+                            "要件：\n"
+                            "- modern, professional, tech-focused を含める\n"
+                            "- AI、技術、ビジネス関連のビジュアル要素\n"
+                            "- クリーンで読みやすいデザイン\n"
+                            "- ブログのアイキャッチに適したサイズ感\n"
+                            "- 文字やテキストは含めない\n"
+                            "- 例: 'Modern professional illustration of AI technology with clean geometric shapes, tech-focused design, blue and white color scheme'"
+                        )
+                    },
+                    {"role": "user", "content": f"タイトル: {title}\n内容の概要: {content[:200]}"}
+                ],
+                temperature=0.7,
+                max_tokens=200
+            )
+            content = resp.choices[0].message.content
+            return content.strip() if content else "Modern professional AI technology illustration with clean design, blue and white colors, tech-focused"
+        except Exception as e:
+            print(f"画像プロンプト生成エラー: {e}")
+            # フォールバック用のデフォルトプロンプト
+            return "Modern professional AI technology illustration with clean design, blue and white colors, tech-focused"
+
+    def generate_featured_image_url(self, image_prompt: str) -> Optional[str]:
+        """
+        DALL·E 3でアイキャッチ画像を生成
+        """
+        try:
+            response = openai.images.generate(
+                model="dall-e-3",
+                prompt=image_prompt,
+                size="1792x1024",  # アイキャッチに適したサイズ
+                n=1
+            )
+            return response.data[0].url
+        except Exception as e:
+            print(f"画像生成エラー: {e}")
+            return None
+
+    def upload_image_to_wp(self, image_url: str, filename: str = None) -> tuple[Optional[int], Optional[str]]:
+        """
+        画像をWordPressにアップロード
+        """
+        if not image_url:
+            return None, None
+            
+        print(f"アイキャッチ画像アップロード開始: {image_url}")
+        
+        try:
+            # 画像を取得
+            img_response = requests.get(image_url, timeout=30)
+            img_response.raise_for_status()
+            original_data = img_response.content
+            print(f"画像サイズ: {len(original_data)} bytes")
+            
+            # 画像サイズが大きい場合はリサイズ
+            if len(original_data) > 500 * 1024:  # 500KB以上の場合
+                try:
+                    from PIL import Image
+                    import io
+                    
+                    # 画像を開く
+                    img = Image.open(io.BytesIO(original_data))
+                    print(f"元画像サイズ: {img.size}")
+                    
+                    # アスペクト比を保持してリサイズ（最大1200x800）
+                    img.thumbnail((1200, 800), Image.Resampling.LANCZOS)
+                    print(f"リサイズ後: {img.size}")
+                    
+                    # JPEG形式で圧縮
+                    img_buffer = io.BytesIO()
+                    if img.mode == 'RGBA':
+                        img = img.convert('RGB')
+                    img.save(img_buffer, format='JPEG', quality=85, optimize=True)
+                    img_data = img_buffer.getvalue()
+                    print(f"圧縮後サイズ: {len(img_data)} bytes")
+                    
+                    filename = filename or "ai_news_featured_image.jpg"
+                    content_type = "image/jpeg"
+                    
+                except ImportError:
+                    print("Pillowがインストールされていません。元画像を使用します。")
+                    img_data = original_data
+                    filename = filename or "ai_news_featured_image.jpg"
+                    content_type = "image/jpeg"
+            else:
+                img_data = original_data
+                filename = filename or "ai_news_featured_image.jpg"
+                content_type = "image/jpeg"
+            
+            # WordPressにアップロード
+            api_url = urljoin(self.config['wp_url'], '/wp-json/wp/v2/media')
+            
+            # ファイル名をASCII文字のみに変換
+            safe_filename = "".join(c for c in filename if ord(c) < 128) or "featured_image.jpg"
+            
+            # 認証情報を取得
+            wp_user = self.config['wp_user']
+            wp_app_pass = self.config['wp_app_pass']
+            
+            resp = requests.post(
+                api_url,
+                auth=(wp_user, wp_app_pass),
+                headers={"Content-Disposition": f'attachment; filename="{safe_filename}"'},
+                files={"file": (safe_filename, img_data, content_type)},
+                timeout=60
+            )
+            
+            if resp.status_code == 201:
+                media_data = resp.json()
+                print(f"アイキャッチ画像アップロード成功: {filename} (ID: {media_data['id']})")
+                return media_data["id"], media_data["source_url"]
+            else:
+                print(f"画像アップロードエラー: {resp.status_code} - {resp.text}")
+                return None, None
+                
+        except Exception as e:
+            print(f"画像アップロード例外: {e}")
+            return None, None
+
     def create_post(self, title: str, content: str, excerpt: str = "", tags: Optional[List[str]] = None, custom_slug: Optional[str] = None) -> Optional[Dict]:
-        """WordPress記事を作成"""
+        """WordPress記事を作成（アイキャッチ画像生成機能付き）"""
         try:
             api_url = urljoin(self.config['wp_url'], '/wp-json/wp/v2/posts')
             
@@ -321,6 +471,32 @@ class WordPressConnector:
             if tags:
                 tag_ids = self.get_or_create_tag_ids(tags)
             
+            # アイキャッチ画像の生成（設定で制御）
+            featured_media_id = None
+            generate_featured_image = self.config['post_settings'].get('generate_featured_image', True)
+            
+            if generate_featured_image:
+                try:
+                    print("🎨 アイキャッチ画像生成開始...")
+                    image_prompt = self.generate_featured_image_prompt(title, content)
+                    print(f"画像プロンプト: {image_prompt}")
+                    
+                    image_url = self.generate_featured_image_url(image_prompt)
+                    if image_url:
+                        media_id, media_url = self.upload_image_to_wp(image_url, f"featured_{title[:20]}.jpg")
+                        if media_id:
+                            featured_media_id = media_id
+                            print(f"✅ アイキャッチ画像設定完了 (ID: {media_id})")
+                        else:
+                            print("⚠️ アイキャッチ画像アップロードに失敗")
+                    else:
+                        print("⚠️ アイキャッチ画像生成に失敗")
+                except Exception as e:
+                    print(f"⚠️ アイキャッチ画像処理エラー: {e}")
+                    print("📝 アイキャッチ画像なしで記事作成を続行します")
+            else:
+                print("📝 アイキャッチ画像生成は無効です")
+            
             post_data = {
                 'title': title,
                 'content': content,
@@ -330,6 +506,10 @@ class WordPressConnector:
                 'tags': tag_ids,  # タグIDの配列を使用
                 'author': self.config['post_settings']['author_id']
             }
+            
+            # アイキャッチ画像を設定
+            if featured_media_id:
+                post_data['featured_media'] = featured_media_id
             
             # スラッグの設定
             slug_config = self.config.get('slug_settings', {})
@@ -349,15 +529,13 @@ class WordPressConnector:
                 # スラッグ生成を無効にしている場合（WordPressのデフォルトを使用）
                 print("スラッグ自動生成は無効です。WordPressのデフォルトスラッグを使用します。")
             
-            # アイキャッチ画像があれば設定
-            if self.config['post_settings']['featured_media']:
-                post_data['featured_media'] = self.config['post_settings']['featured_media']
-            
             response = self.session.post(api_url, json=post_data, timeout=30)
             
             if response.status_code == 201:
                 post_info = response.json()
                 print(f"WordPress投稿成功: {post_info['link']}")
+                if featured_media_id:
+                    print(f"🖼️ アイキャッチ画像付きで投稿完了")
                 return post_info
             else:
                 print(f"WordPress投稿失敗: {response.status_code} - {response.text}")
