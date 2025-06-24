@@ -1,7 +1,7 @@
 {
-  "url": "YOUR_WORDPRESS_SITE_URL",
-  "user": "YOUR_WP_USERNAME",
-  "app_pass": "YOUR_WP_APPLICATION_PASSWORD",
+  "url": "https://ai-gene.jp",
+  "user": "APIUSER",
+  "app_pass": "Ah3J norO VGMu wrnk Wb3p 4IDt",
   "post": {
     "status": "publish",
     "category_id": 1,
