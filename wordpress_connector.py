@@ -338,15 +338,16 @@ class WordPressConnector:
                         "role": "system",
                         "content": (
                             "あなたは画像プロンプト作成のエキスパートです。"
-                            "AIニュース記事のアイキャッチ画像に適した、プロフェッショナルで"
-                            "魅力的な画像を生成するための英語プロンプトを1文で答えてください。\n\n"
+                            "AIニュース記事のアイキャッチ画像に適した、極端にシンプルで"
+                            "パステルカラーのアイコンベース画像を生成するための英語プロンプトを1文で答えてください。\n\n"
                             "要件：\n"
-                            "- modern, professional, tech-focused を含める\n"
-                            "- AI、技術、ビジネス関連のビジュアル要素\n"
-                            "- クリーンで読みやすいデザイン\n"
-                            "- ブログのアイキャッチに適したサイズ感\n"
+                            "- extremely simple, minimalist, icon-based design\n"
+                            "- soft pastel colors (light pink, mint green, lavender, peach, sky blue)\n"
+                            "- AI関連のシンプルなアイコン（脳、回路、ロボット顔など）\n"
+                            "- 白い背景\n"
                             "- 文字やテキストは含めない\n"
-                            "- 例: 'Modern professional illustration of AI technology with clean geometric shapes, tech-focused design, blue and white color scheme'"
+                            "- flat design, vector-style\n"
+                            "- 例: 'Extremely simple minimalist AI brain icon in soft pastel colors, flat design, white background, vector-style illustration'"
                         )
                     },
                     {"role": "user", "content": f"タイトル: {title}\n内容の概要: {content[:200]}"}
@@ -355,11 +356,11 @@ class WordPressConnector:
                 max_tokens=200
             )
             content = resp.choices[0].message.content
-            return content.strip() if content else "Modern professional AI technology illustration with clean design, blue and white colors, tech-focused"
+            return content.strip() if content else "Extremely simple minimalist AI brain icon in soft pastel colors, flat design, white background, vector-style illustration"
         except Exception as e:
             print(f"画像プロンプト生成エラー: {e}")
             # フォールバック用のデフォルトプロンプト
-            return "Modern professional AI technology illustration with clean design, blue and white colors, tech-focused"
+            return "Extremely simple minimalist AI brain icon in soft pastel colors, flat design, white background, vector-style illustration"
 
     def generate_featured_image_url(self, image_prompt: str) -> Optional[str]:
         """

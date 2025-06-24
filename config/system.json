@@ -1,0 +1,8 @@
+{
+  "log_level": "DEBUG",
+  "log_file": "logs/ai_news_collector.log",
+  "data_dir": "data",
+  "cache_dir": "cache",
+  "backup_enabled": true,
+  "max_concurrent_requests": 10
+}

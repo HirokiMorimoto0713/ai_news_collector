@@ -1,0 +1,25 @@
+{
+  "max_articles_per_day": 1,
+  "max_articles_per_source": 3,
+  "time_range_hours": 24,
+  "sources": {
+    "news_sites": true,
+    "tech_blogs": true,
+    "x_posts": false
+  },
+  "filters": {
+    "min_content_length": 100,
+    "exclude_keywords": [
+      "広告",
+      "PR"
+    ],
+    "required_keywords": [
+      "AI",
+      "人工知能",
+      "機械学習",
+      "ChatGPT",
+      "LLM",
+      "技術"
+    ]
+  }
+}
