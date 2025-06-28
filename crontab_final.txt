@@ -1,0 +1,4 @@
+# wp-auto 自動記事作成・投稿 (毎日9時、13時、18時)
+0 9 * * * cd /home/morimotodaiki/projects/wp-auto && /usr/bin/python3 post_article.py >> logs/cron.log 2>&1
+0 13 * * * cd /home/morimotodaiki/projects/wp-auto && /usr/bin/python3 post_article.py >> logs/cron.log 2>&1
+0 18 * * * cd /home/morimotodaiki/projects/wp-auto && /usr/bin/python3 post_article.py >> logs/cron.log 2>&1 
