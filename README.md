@@ -2,9 +2,33 @@
 
 AIに関するニュースを自動収集し、WordPressに投稿するシステム
 
+## 🔗 GitHubリポジトリ
+
+**メインリポジトリ**: [https://github.com/HirokiMorimoto0713/ai_news_collector](https://github.com/HirokiMorimoto0713/ai_news_collector)
+
 ## 📋 プロジェクト概要
 
 このシステムは複数のソースからAI関連のニュースを収集し、自動的にWordPressサイトに投稿することを目的としています。
+
+## 🔄 リファクタリング版について
+
+**NEW**: リファクタリング版が利用可能です！
+
+### リファクタリング版の特徴
+- **モジュール化された構造**: `src/core/`, `src/utils/` ディレクトリ
+- **統一設定管理**: JSON形式の設定ファイル (`config/`)
+- **カラー対応ログ**: 詳細な実行ログとエラー追跡
+- **型安全性**: 完全な型ヒント対応
+- **強化されたエラーハンドリング**: カスタム例外とグレースフル処理
+
+### 使用方法
+```bash
+# リファクタリング版の実行
+python main_refactored.py
+
+# 従来版（互換性維持）
+python main.py
+```
 
 ## ✅ 現在実装済みの機能
 
@@ -34,61 +58,71 @@ AIに関するニュースを自動収集し、WordPressに投稿するシステ
 
 ```
 ai_news_collector/
-├── main.py                    # メイン実行ファイル
+├── main.py                    # メイン実行ファイル（従来版）
+├── main_refactored.py         # メイン実行ファイル（リファクタリング版）
 ├── news_collector.py          # ニュース収集エンジン
 ├── article_processor.py       # 記事処理・要約
 ├── wordpress_connector.py     # WordPress連携
 ├── integrated_collector.py    # 統合収集システム
-├── simple_x_collector.py      # X関連情報収集（安定版）
-├── config_manager.py          # 設定管理
-├── collector_config.json.template # 設定テンプレート
-└── requirements.txt           # 依存関係
+├── src/                       # リファクタリング版モジュール
+│   ├── core/                  # コアモジュール
+│   │   ├── config.py         # 設定管理
+│   │   ├── logger.py         # ログシステム
+│   │   ├── models.py         # データモデル
+│   │   └── exceptions.py     # カスタム例外
+│   └── utils/                 # ユーティリティ
+│       ├── http_client.py    # HTTP通信
+│       ├── text_utils.py     # テキスト処理
+│       ├── file_utils.py     # ファイル操作
+│       └── date_utils.py     # 日付処理
+├── config/                    # 設定ファイル（自動生成）
+│   ├── openai.json           # OpenAI API設定
+│   ├── wordpress.json        # WordPress設定
+│   ├── collection.json       # 収集設定
+│   └── system.json           # システム設定
+├── requirements.txt           # 依存関係（従来版）
+├── requirements_refactored.txt # 依存関係（リファクタリング版）
+└── README_REFACTORED.md       # リファクタリング版詳細説明
 ```
-
-## 📊 収集実績
-
-### 通常運用での収集数
-- **通常ニュース**: 5-15件/回
-- **X関連情報**: 無効化済み
-- **合計**: 5-15件/回
-
-### 収集ソース別統計
-- ITmedia: 50%
-- GIGAZINE: 30%
-- TechCrunch: 15%
-- その他: 5%
-
-## ⚠️ 無効化された機能
-
-### X関連情報収集機能
-**X関連の情報収集機能は完全に無効化されました。**
-
-#### 無効化理由
-- **実際のX投稿収集**: 技術的困難（0件収集）
-- **X風の代替情報**: ユーザー要求により無効化
-- **収集対象**: ニュースサイトのみに限定
-
-#### 無効化されたファイル
-- `simple_x_collector.py` - X風情報収集（無効化済み）
-- `direct_x_scraper.py` - 直接スクレイピング（実験版）
-- `real_x_scraper.py` - 代替手段による収集
-- `advanced_x_scraper.py` - 高度なスクレイピング
-- `x_post_collection_summary.md` - 検討資料
 
 ## 🚀 セットアップ手順
 
-### 1. 依存関係のインストール
+### 1. リポジトリのクローン
+```bash
+git clone https://github.com/HirokiMorimoto0713/ai_news_collector.git
+cd ai_news_collector
+```
+
+### 2. 依存関係のインストール
+
+#### 従来版
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 設定ファイルの作成
+#### リファクタリング版（推奨）
+```bash
+pip install -r requirements_refactored.txt
+```
+
+### 3. 設定ファイルの作成
+
+#### 従来版
 ```bash
 cp collector_config.json.template collector_config.json
 # collector_config.jsonを編集して設定を入力
 ```
 
-### 3. 実行
+#### リファクタリング版
+```bash
+# 初回実行で設定ファイルが自動生成されます
+python main_refactored.py
+# config/ ディレクトリ内の設定ファイルを編集
+```
+
+### 4. 実行
+
+#### 従来版
 ```bash
 # 統合収集の実行
 python main.py
@@ -96,6 +130,12 @@ python main.py
 # 個別テスト
 python news_collector.py
 python integrated_collector.py
+```
+
+#### リファクタリング版
+```bash
+# リファクタリング版の実行
+python main_refactored.py
 ```
 
 ## 📝 設定項目
@@ -141,11 +181,11 @@ OPENAI_API_KEY=your_openai_api_key
 
 ### Cronジョブ例
 ```bash
-# 毎日9時に実行
+# 従来版: 毎日9時に実行
 0 9 * * * cd /path/to/ai_news_collector && python main.py
 
-# 毎時実行
-0 * * * * cd /path/to/ai_news_collector && python integrated_collector.py
+# リファクタリング版: 毎日12時に実行
+0 12 * * * cd /path/to/ai_news_collector && python main_refactored.py
 ```
 
 ## 📈 パフォーマンス
@@ -194,11 +234,14 @@ OPENAI_API_KEY=your_openai_api_key
 
 ### ログ確認
 ```bash
-# 実行ログの確認
+# 従来版: 実行ログの確認
 tail -f logs/collector.log
 
+# リファクタリング版: カラー対応ログの確認
+tail -f logs/ai_news_collector.log
+
 # エラーログの確認
-grep ERROR logs/collector.log
+grep ERROR logs/*.log
 ```
 
 ## 📄 ライセンス
@@ -207,6 +250,13 @@ grep ERROR logs/collector.log
 商用利用の場合は、各ニュースサイトの利用規約を確認してください。
 
 ## 🔄 更新履歴
+
+### v2.0.0 (2024-06-XX) - リファクタリング版
+- モジュール化されたアーキテクチャ
+- 統一設定管理システム
+- カラー対応ログシステム
+- 型安全性の向上
+- 強化されたエラーハンドリング
 
 ### v1.0.0 (2024-01-XX)
 - 基本的なニュース収集機能の実装
